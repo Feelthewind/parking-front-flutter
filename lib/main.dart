@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +13,7 @@ import 'models/parking.dart';
 
 void main() {
   runApp(MyApp());
+  // debugPaintSizeEnabled = true;
 }
 
 class MyApp extends StatelessWidget {
@@ -162,25 +164,63 @@ class MapSampleState extends State<MapSample> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: currentLocation != null
-          ? GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target:
-                    LatLng(currentLocation.latitude, currentLocation.longitude),
-                zoom: 17.0,
+      body: Stack(
+        children: <Widget>[
+          currentLocation != null
+              ? GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(
+                        currentLocation.latitude, currentLocation.longitude),
+                    zoom: 17.0,
+                  ),
+                  // TODO(iskakaushik): Remove this when collection literals makes it to stable.
+                  // https://github.com/flutter/flutter/issues/28312
+                  // ignore: prefer_collection_literals
+                  markers: Set<Marker>.of(markers.values),
+                  myLocationEnabled: true,
+                )
+              : Container(),
+          Container(
+            padding: const EdgeInsets.all(12.0),
+            width: double.infinity,
+            height: double.infinity,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  FloatingActionButton(
+                    child: Icon(
+                      Icons.add,
+                      size: 20.0,
+                      color: Colors.black45,
+                    ),
+                    onPressed: () {
+                      controller.moveCamera(CameraUpdate.zoomIn());
+                    },
+                    backgroundColor: Colors.white,
+                    elevation: 8.0,
+                    mini: true,
+                  ),
+                  FloatingActionButton(
+                    child: Icon(
+                      Icons.remove,
+                      size: 20.0,
+                      color: Colors.black45,
+                    ),
+                    onPressed: () {
+                      controller.moveCamera(CameraUpdate.zoomOut());
+                    },
+                    backgroundColor: Colors.white,
+                    elevation: 8.0,
+                    mini: true,
+                  ),
+                ],
               ),
-              // TODO(iskakaushik): Remove this when collection literals makes it to stable.
-              // https://github.com/flutter/flutter/issues/28312
-              // ignore: prefer_collection_literals
-              markers: Set<Marker>.of(markers.values),
-              myLocationEnabled: true,
-            )
-          : Container(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: Text('To the lake!'),
-        icon: Icon(Icons.directions_boat),
+            ),
+          ),
+        ],
       ),
     );
   }
