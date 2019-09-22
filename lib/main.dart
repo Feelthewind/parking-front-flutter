@@ -6,10 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
+import 'package:parking_flutter/widgets/parking_bottom_modal.dart';
 
 import 'models/parking.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -67,6 +70,8 @@ class MapSampleState extends State<MapSample> {
   }
 
   void _add(double lat, double lng, Parking parking) {
+    print(parking.timezones);
+    print(parking.timezones.timezones);
     final int markerCount = markers.length;
 
     if (markerCount == 12) {
@@ -82,7 +87,12 @@ class MapSampleState extends State<MapSample> {
       position: LatLng(lat, lng),
       infoWindow: InfoWindow(title: parking.price, snippet: '*'),
       onTap: () {
-        // _onMarkerTapped(markerId);
+        showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return ParkingBottomModal(parking);
+          },
+        );
       },
     );
 
@@ -158,7 +168,7 @@ class MapSampleState extends State<MapSample> {
               initialCameraPosition: CameraPosition(
                 target:
                     LatLng(currentLocation.latitude, currentLocation.longitude),
-                zoom: 15.0,
+                zoom: 17.0,
               ),
               // TODO(iskakaushik): Remove this when collection literals makes it to stable.
               // https://github.com/flutter/flutter/issues/28312
