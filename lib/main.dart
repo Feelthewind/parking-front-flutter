@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 import 'package:parking_flutter/widgets/parking_bottom_modal.dart';
+import 'package:parking_flutter/widgets/parking_expansion_tile.dart';
 
 import 'models/parking.dart';
 
@@ -87,7 +88,7 @@ class MapSampleState extends State<MapSample> {
     final Marker marker = Marker(
       markerId: markerId,
       position: LatLng(lat, lng),
-      infoWindow: InfoWindow(title: parking.price, snippet: '*'),
+      infoWindow: InfoWindow(title: parking.price.substring(1)),
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -164,6 +165,7 @@ class MapSampleState extends State<MapSample> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBar: AppBar(),
       body: Stack(
         children: <Widget>[
           currentLocation != null
@@ -172,54 +174,60 @@ class MapSampleState extends State<MapSample> {
                   initialCameraPosition: CameraPosition(
                     target: LatLng(
                         currentLocation.latitude, currentLocation.longitude),
-                    zoom: 17.0,
+                    zoom: 16.0,
                   ),
                   // TODO(iskakaushik): Remove this when collection literals makes it to stable.
                   // https://github.com/flutter/flutter/issues/28312
                   // ignore: prefer_collection_literals
                   markers: Set<Marker>.of(markers.values),
                   myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
                 )
               : Container(),
           Container(
             padding: const EdgeInsets.all(12.0),
             width: double.infinity,
             height: double.infinity,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  FloatingActionButton(
-                    child: Icon(
-                      Icons.add,
-                      size: 20.0,
-                      color: Colors.black45,
-                    ),
-                    onPressed: () {
-                      controller.moveCamera(CameraUpdate.zoomIn());
-                    },
-                    backgroundColor: Colors.white,
-                    elevation: 8.0,
-                    mini: true,
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      FloatingActionButton(
+                        child: Icon(
+                          Icons.add,
+                          size: 20.0,
+                          color: Colors.black45,
+                        ),
+                        onPressed: () {
+                          controller.moveCamera(CameraUpdate.zoomIn());
+                        },
+                        backgroundColor: Colors.white,
+                        elevation: 8.0,
+                        mini: true,
+                      ),
+                      FloatingActionButton(
+                        child: Icon(
+                          Icons.remove,
+                          size: 20.0,
+                          color: Colors.black45,
+                        ),
+                        onPressed: () {
+                          controller.animateCamera(CameraUpdate.zoomOut());
+                        },
+                        backgroundColor: Colors.white,
+                        elevation: 8.0,
+                        mini: true,
+                      ),
+                    ],
                   ),
-                  FloatingActionButton(
-                    child: Icon(
-                      Icons.remove,
-                      size: 20.0,
-                      color: Colors.black45,
-                    ),
-                    onPressed: () {
-                      controller.moveCamera(CameraUpdate.zoomOut());
-                    },
-                    backgroundColor: Colors.white,
-                    elevation: 8.0,
-                    mini: true,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
+          ParkingExpansionTile(),
         ],
       ),
     );
