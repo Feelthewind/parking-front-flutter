@@ -3,8 +3,9 @@ import 'package:parking_flutter/models/parking.dart';
 
 class ParkingBottomModal extends StatelessWidget {
   final Parking parking;
+  final int count;
 
-  ParkingBottomModal(this.parking);
+  ParkingBottomModal(this.parking, [this.count = 1]);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class ParkingBottomModal extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    '${parking.price.substring(1)} 원',
+                    '${(int.parse(parking.price.substring(1)) * count).toString()} 원',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

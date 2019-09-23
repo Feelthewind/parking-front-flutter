@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Google Maps Demo',
       home: MapSample(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -35,6 +36,8 @@ class MapSample extends StatefulWidget {
 class MapSampleState extends State<MapSample> {
   GoogleMapController controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  Map<MarkerId, String> prices = <MarkerId, String>{};
+  Map<MarkerId, Parking> parkings = <MarkerId, Parking>{};
   MarkerId selectedMarker;
   int _markerIdCounter = 1;
 
@@ -42,12 +45,36 @@ class MapSampleState extends State<MapSample> {
   Location _locationService = new Location();
   bool _permission = false;
   String error;
+  int count = 1;
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
     getParkings();
+  }
+
+  void handleTimeSelected(int count) {
+    setState(() {
+      count = count;
+    });
+    markers.forEach((markerId, marker) {
+      marker = marker.copyWith(
+          infoWindowParam: InfoWindow(
+            title: (int.parse(prices[markerId]) * count).toString(),
+          ),
+          onTapParam: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return ParkingBottomModal(parkings[markerId], count);
+              },
+            );
+          });
+      setState(() {
+        markers[markerId] = marker;
+      });
+    });
   }
 
   void getParkings() async {
@@ -73,8 +100,6 @@ class MapSampleState extends State<MapSample> {
   }
 
   void _add(double lat, double lng, Parking parking) {
-    print(parking.timezones);
-    print(parking.timezones.timezones);
     final int markerCount = markers.length;
 
     if (markerCount == 12) {
@@ -85,10 +110,14 @@ class MapSampleState extends State<MapSample> {
     _markerIdCounter++;
     final MarkerId markerId = MarkerId(markerIdVal);
 
+    parkings[markerId] = parking;
+
     final Marker marker = Marker(
       markerId: markerId,
       position: LatLng(lat, lng),
-      infoWindow: InfoWindow(title: parking.price.substring(1)),
+      infoWindow: InfoWindow(
+        title: parking.price.substring(1).toString(),
+      ),
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -101,6 +130,7 @@ class MapSampleState extends State<MapSample> {
 
     setState(() {
       markers[markerId] = marker;
+      prices[markerId] = parking.price.substring(1);
     });
   }
 
@@ -147,25 +177,24 @@ class MapSampleState extends State<MapSample> {
     }
   }
 
-  // getLocation() async {
-  //   try {
-  //     currentLocation = await location.getLocation();
-  //     setState(() {
-  //       currentLocation = currentLocation;
-  //     });
-  //   } on PlatformException catch (e) {
-  //     if (e.code == 'PERMISSION_DENIED') {
-  //       print('=================================');
-  //       print('Permission denied');
-  //     }
-  //     currentLocation = null;
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {},
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.publish,
+              color: Colors.white,
+            ),
+            onPressed: () {},
+          )
+        ],
+      ),
       body: Stack(
         children: <Widget>[
           currentLocation != null
@@ -227,7 +256,7 @@ class MapSampleState extends State<MapSample> {
               ],
             ),
           ),
-          ParkingExpansionTile(),
+          ParkingExpansionTile(this.handleTimeSelected),
         ],
       ),
     );

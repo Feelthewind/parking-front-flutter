@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
 
 class ParkingExpansionTile extends StatefulWidget {
+  ParkingExpansionTile(this.onTimeSelected);
+
+  final onTimeSelected;
+
   @override
   _ParkingExpansionTileState createState() => _ParkingExpansionTileState();
 }
 
 class _ParkingExpansionTileState extends State<ParkingExpansionTile> {
-  final times = ["30분", "1시간", "2시간", "3시간", "4시간", "6시간", "8시간"];
+  final times = [
+    {"desc": "30분", "count": 1},
+    {"desc": "1시간", "count": 2},
+    {"desc": "2시간", "count": 4},
+    {"desc": "3시간", "count": 6},
+    {"desc": "4시간", "count": 8},
+    {"desc": "6시간", "count": 12},
+    {"desc": "8시간", "count": 16},
+  ];
   var currentTimeIndex = 0;
 
-  List<Widget> buildTimeWidgets(List<String> times) {
+  List<Widget> buildTimeWidgets(List<Map<String, dynamic>> times) {
     final list = new List<Widget>();
     for (var i = 0; i < times.length; i++) {
-      list.add(buildTimeWidget(times[i], i));
+      list.add(buildTimeWidget(times[i]["desc"], i));
     }
     return list;
   }
@@ -28,6 +40,7 @@ class _ParkingExpansionTileState extends State<ParkingExpansionTile> {
           setState(() {
             currentTimeIndex = index;
           });
+          this.widget.onTimeSelected(times[index]["count"]);
         },
       ),
     );
@@ -42,7 +55,7 @@ class _ParkingExpansionTileState extends State<ParkingExpansionTile> {
         title: Row(
           children: <Widget>[
             Text(
-              times[currentTimeIndex],
+              times[currentTimeIndex]["desc"],
               style: TextStyle(color: Colors.black87),
             ),
             Icon(
