@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
+import 'package:parking_flutter/services/parking.dart';
 import 'package:parking_flutter/widgets/parking_bottom_modal.dart';
 import 'package:parking_flutter/widgets/parking_expansion_tile.dart';
 
@@ -39,19 +40,19 @@ class MapSampleState extends State<MapSample> {
   Map<MarkerId, String> prices = <MarkerId, String>{};
   Map<MarkerId, Parking> parkings = <MarkerId, Parking>{};
   MarkerId selectedMarker;
-  int _markerIdCounter = 1;
 
   LocationData currentLocation = null;
   Location _locationService = new Location();
   bool _permission = false;
   String error;
   int count = 1;
+  double zoom;
+  ParkingService parkingService;
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
-    getParkings();
   }
 
   void handleTimeSelected(int count) {
@@ -77,37 +78,48 @@ class MapSampleState extends State<MapSample> {
     });
   }
 
-  void getParkings() async {
-    var queryParameters = {
-      'lat': '37.611538',
-      'lng': '127.140162',
-    };
-    var uri =
-        Uri.http('172.30.1.29:3000', '/parking/distance', queryParameters);
-    var response = await http.get(uri, headers: {
-      // HttpHeaders.authorizationHeader: 'Token $token',
-      HttpHeaders.contentTypeHeader: 'application/json',
-    });
+  void getParkings([double zoom = 10.0]) async {
+    if (zoom < 14.0) {
+      // get parkings by clustering
+    } else {
+      // get parkings by bounds
 
-    final dynamic jsonResponse = jsonDecode(response.body);
-    final ParkingList parkingList = ParkingList.fromJson(jsonResponse);
+      LatLngBounds bounds = await controller.getVisibleRegion();
+      print(bounds.southwest);
+      print(bounds.northeast);
+      // var queryParameters = {
+      //   'lat': '37.611538',
+      //   'lng': '127.140162',
+      // };
+      var queryParameters = {
+        'xmin': bounds.southwest.latitude.toString(),
+        'ymin': bounds.southwest.longitude.toString(),
+        'xmax': bounds.northeast.latitude.toString(),
+        'ymax': bounds.northeast.longitude.toString(),
+      };
+      var uri =
+          Uri.http('172.30.1.29:3000', '/parking/bounds', queryParameters);
+      var response = await http.get(uri, headers: <String, String>{
+        // HttpHeaders.authorizationHeader: 'Token $token',
+        HttpHeaders.contentTypeHeader: 'application/json',
+        'Accept': 'application/json',
+      });
 
-    for (var i = 0; i < parkingList.parkings.length; i++) {
-      final lat = parkingList.parkings[i].coordinates[0];
-      final lng = parkingList.parkings[i].coordinates[1];
-      _add(lat, lng, parkingList.parkings[i]);
+      print(response.body);
+
+      final dynamic jsonResponse = jsonDecode(response.body);
+      final ParkingList parkingList = ParkingList.fromJson(jsonResponse);
+
+      for (var i = 0; i < parkingList.parkings.length; i++) {
+        final lat = parkingList.parkings[i].coordinates[0];
+        final lng = parkingList.parkings[i].coordinates[1];
+        _add(lat, lng, parkingList.parkings[i]);
+      }
     }
   }
 
   void _add(double lat, double lng, Parking parking) {
-    final int markerCount = markers.length;
-
-    if (markerCount == 12) {
-      return;
-    }
-
-    final String markerIdVal = 'marker_id_$_markerIdCounter';
-    _markerIdCounter++;
+    final String markerIdVal = parking.id.toString();
     final MarkerId markerId = MarkerId(markerIdVal);
 
     parkings[markerId] = parking;
@@ -203,7 +215,7 @@ class MapSampleState extends State<MapSample> {
                   initialCameraPosition: CameraPosition(
                     target: LatLng(
                         currentLocation.latitude, currentLocation.longitude),
-                    zoom: 16.0,
+                    zoom: 10.0,
                   ),
                   // TODO(iskakaushik): Remove this when collection literals makes it to stable.
                   // https://github.com/flutter/flutter/issues/28312
@@ -211,6 +223,8 @@ class MapSampleState extends State<MapSample> {
                   markers: Set<Marker>.of(markers.values),
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
+                  rotateGesturesEnabled: false,
+                  onCameraMove: _onGeoChanged,
                 )
               : Container(),
           Container(
@@ -231,7 +245,7 @@ class MapSampleState extends State<MapSample> {
                           color: Colors.black45,
                         ),
                         onPressed: () {
-                          controller.moveCamera(CameraUpdate.zoomIn());
+                          controller.animateCamera(CameraUpdate.zoomIn());
                         },
                         backgroundColor: Colors.white,
                         elevation: 8.0,
@@ -262,7 +276,48 @@ class MapSampleState extends State<MapSample> {
     );
   }
 
-  void _onMapCreated(GoogleMapController controller) {
+  void _onGeoChanged(CameraPosition position) async {
+    print("position: " + position.target.toString());
+    print("zoom: " + position.zoom.toString());
+
+    if ((position.zoom.floorToDouble() / position.zoom) == 1.0) {
+      if (position.zoom == 14.0) {
+        // Get parkings by bounds
+        print('Get parkings by bounds');
+        final parkings = await parkingService.getParkingsByBounds();
+        _addParkings(parkings);
+      }
+      if ((zoom - position.zoom < 0) && (position.zoom > 14.0)) {
+        // No need to fetch again.
+        print('No need to fetch again');
+        return;
+      } else if (position.zoom < 14.0) {
+        // Get parkings by clustering
+        print('Get parkings by clustering');
+      } // print('getparkings called');
+
+      // getParkings(position.zoom);
+    }
+
+    setState(() {
+      zoom = position.zoom;
+    });
+  }
+
+  void _onMapCreated(GoogleMapController controller) async {
     this.controller = controller;
+
+    parkingService = ParkingService(controller);
+
+    final parkings = await parkingService.getParkingsByBounds();
+    _addParkings(parkings);
+  }
+
+  void _addParkings(ParkingList parkingList) async {
+    for (var i = 0; i < parkingList.parkings.length; i++) {
+      final lat = parkingList.parkings[i].coordinates[0];
+      final lng = parkingList.parkings[i].coordinates[1];
+      _add(lat, lng, parkingList.parkings[i]);
+    }
   }
 }
