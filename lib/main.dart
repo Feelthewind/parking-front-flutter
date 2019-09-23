@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong/latlong.dart' as LatLngPlugin;
 import 'package:location/location.dart';
 import 'package:parking_flutter/models/cluster.dart';
 import 'package:parking_flutter/services/parking.dart';
@@ -43,6 +44,7 @@ class MapSampleState extends State<MapSample> {
   MarkerId selectedMarker;
 
   LocationData currentLocation;
+  LocationData priorLocation;
   Location _locationService = new Location();
   bool _permission = false;
   String error;
@@ -51,11 +53,13 @@ class MapSampleState extends State<MapSample> {
   ParkingService parkingService;
   bool zoomingIn = false;
   Set<Circle> _circles = Set();
+  int timer = 0;
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
+    _initLocationChanged();
   }
 
   void handleTimeSelected(int count) {
@@ -391,6 +395,44 @@ class MapSampleState extends State<MapSample> {
     setState(() {
       _circles = newCircles;
       markers = {};
+    });
+  }
+
+  void _initLocationChanged() {
+    _locationService.onLocationChanged().listen((LocationData location) {
+      if (timer == 0) {
+        setState(() {
+          priorLocation = location;
+        });
+      }
+      if (timer % 10 == 0) {
+        setState(() {
+          priorLocation = location;
+        });
+      }
+      setState(() {
+        currentLocation = location;
+      });
+      timer++;
+
+      // calculate distance between current and prior location and if it is greater than threshold value, get parkings by bounds.
+      final LatLngPlugin.Distance distance = LatLngPlugin.Distance();
+      final double meter = distance(
+        LatLngPlugin.LatLng(priorLocation.latitude, priorLocation.longitude),
+        LatLngPlugin.LatLng(
+            currentLocation.latitude, currentLocation.longitude),
+      );
+
+      print('distance');
+      print(meter);
+
+      if (meter >= 10.0) {
+        controller.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(currentLocation.latitude, currentLocation.longitude),
+          ),
+        );
+      }
     });
   }
 }
