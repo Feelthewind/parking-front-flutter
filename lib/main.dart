@@ -46,8 +46,9 @@ class MapSampleState extends State<MapSample> {
   bool _permission = false;
   String error;
   int count = 1;
-  double zoom;
+  double zoom = 14.0;
   ParkingService parkingService;
+  bool zoomingIn = false;
 
   @override
   void initState() {
@@ -215,7 +216,7 @@ class MapSampleState extends State<MapSample> {
                   initialCameraPosition: CameraPosition(
                     target: LatLng(
                         currentLocation.latitude, currentLocation.longitude),
-                    zoom: 10.0,
+                    zoom: 16.0,
                   ),
                   // TODO(iskakaushik): Remove this when collection literals makes it to stable.
                   // https://github.com/flutter/flutter/issues/28312
@@ -225,6 +226,7 @@ class MapSampleState extends State<MapSample> {
                   myLocationButtonEnabled: false,
                   rotateGesturesEnabled: false,
                   onCameraMove: _onGeoChanged,
+                  onCameraIdle: _onGeoEnded,
                 )
               : Container(),
           Container(
@@ -276,27 +278,32 @@ class MapSampleState extends State<MapSample> {
     );
   }
 
+  void _onGeoEnded() async {
+    if (zoom < 14.0) {
+      // Get parkings by clustering
+      print('Get parkings by clustering');
+    } else if ((zoom >= 14.0) && !zoomingIn) {
+      final parkings = await parkingService.getParkingsByBounds();
+      print('add new parkings');
+      print(parkings);
+      _addParkings(parkings);
+    }
+    print('zooming');
+    print(zoomingIn);
+  }
+
   void _onGeoChanged(CameraPosition position) async {
     print("position: " + position.target.toString());
     print("zoom: " + position.zoom.toString());
 
-    if ((position.zoom.floorToDouble() / position.zoom) == 1.0) {
-      if (position.zoom == 14.0) {
-        // Get parkings by bounds
-        print('Get parkings by bounds');
-        final parkings = await parkingService.getParkingsByBounds();
-        _addParkings(parkings);
-      }
-      if ((zoom - position.zoom < 0) && (position.zoom > 14.0)) {
-        // No need to fetch again.
-        print('No need to fetch again');
-        return;
-      } else if (position.zoom < 14.0) {
-        // Get parkings by clustering
-        print('Get parkings by clustering');
-      } // print('getparkings called');
-
-      // getParkings(position.zoom);
+    if (zoom - position.zoom < 0) {
+      setState(() {
+        zoomingIn = true;
+      });
+    } else if (zoom - position.zoom > 0) {
+      setState(() {
+        zoomingIn = false;
+      });
     }
 
     setState(() {
