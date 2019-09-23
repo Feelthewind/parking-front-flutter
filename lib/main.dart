@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
+import 'package:parking_flutter/models/cluster.dart';
 import 'package:parking_flutter/services/parking.dart';
 import 'package:parking_flutter/widgets/parking_bottom_modal.dart';
 import 'package:parking_flutter/widgets/parking_expansion_tile.dart';
@@ -41,7 +42,7 @@ class MapSampleState extends State<MapSample> {
   Map<MarkerId, Parking> parkings = <MarkerId, Parking>{};
   MarkerId selectedMarker;
 
-  LocationData currentLocation = null;
+  LocationData currentLocation;
   Location _locationService = new Location();
   bool _permission = false;
   String error;
@@ -49,6 +50,7 @@ class MapSampleState extends State<MapSample> {
   double zoom = 14.0;
   ParkingService parkingService;
   bool zoomingIn = false;
+  Set<Circle> _circles = Set();
 
   @override
   void initState() {
@@ -227,6 +229,7 @@ class MapSampleState extends State<MapSample> {
                   rotateGesturesEnabled: false,
                   onCameraMove: _onGeoChanged,
                   onCameraIdle: _onGeoEnded,
+                  circles: _circles,
                 )
               : Container(),
           Container(
@@ -269,6 +272,41 @@ class MapSampleState extends State<MapSample> {
                     ],
                   ),
                 ),
+                Align(
+                  alignment: Alignment(-1, -0.8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey[400],
+                            blurRadius: 1.0,
+                            spreadRadius: 1.0,
+                            offset: Offset(1.0, 1.0),
+                          )
+                        ]),
+                    child: IconButton(
+                      icon: Icon(Icons.my_location),
+                      onPressed: () async {
+                        final location = await _locationService.getLocation();
+                        this.setState(() {
+                          currentLocation = location;
+                        });
+                        if (currentLocation is LocationData) {
+                          print(currentLocation.latitude);
+                          print(currentLocation.longitude);
+                        }
+                        controller.animateCamera(
+                          CameraUpdate.newLatLngZoom(
+                              LatLng(currentLocation.latitude,
+                                  currentLocation.longitude),
+                              16),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -280,22 +318,17 @@ class MapSampleState extends State<MapSample> {
 
   void _onGeoEnded() async {
     if (zoom < 14.0) {
-      // Get parkings by clustering
       print('Get parkings by clustering');
-    } else if ((zoom >= 14.0) && !zoomingIn) {
+      final clusters = await parkingService.getParkingsByClustering();
+      _addClusters(clusters);
+    } else if (zoom >= 14.0) {
+      print('Get parkings by bounds');
       final parkings = await parkingService.getParkingsByBounds();
-      print('add new parkings');
-      print(parkings);
       _addParkings(parkings);
     }
-    print('zooming');
-    print(zoomingIn);
   }
 
   void _onGeoChanged(CameraPosition position) async {
-    print("position: " + position.target.toString());
-    print("zoom: " + position.zoom.toString());
-
     if (zoom - position.zoom < 0) {
       setState(() {
         zoomingIn = true;
@@ -305,7 +338,6 @@ class MapSampleState extends State<MapSample> {
         zoomingIn = false;
       });
     }
-
     setState(() {
       zoom = position.zoom;
     });
@@ -321,10 +353,44 @@ class MapSampleState extends State<MapSample> {
   }
 
   void _addParkings(ParkingList parkingList) async {
+    setState(() {
+      _circles = Set();
+    });
     for (var i = 0; i < parkingList.parkings.length; i++) {
       final lat = parkingList.parkings[i].coordinates[0];
       final lng = parkingList.parkings[i].coordinates[1];
       _add(lat, lng, parkingList.parkings[i]);
     }
+  }
+
+  void _addClusters(ClusterList clusters) {
+    // TODO: Show count text within circle
+    Set<Circle> newCircles = Set();
+    clusters.clusters.forEach((c) {
+      newCircles.add(
+        Circle(
+          circleId: CircleId(c.center.toString()),
+          center: LatLng(c.center[0], c.center[1]),
+          radius: 1000,
+          fillColor: Colors.green.withOpacity(0.3),
+          strokeWidth: 0,
+          onTap: () {
+            print('==========');
+            print('circle tapped');
+            controller.animateCamera(
+              CameraUpdate.newLatLngZoom(
+                LatLng(c.center[0], c.center[1]),
+                zoom + 1,
+              ),
+            );
+          },
+          consumeTapEvents: true,
+        ),
+      );
+    });
+    setState(() {
+      _circles = newCircles;
+      markers = {};
+    });
   }
 }
