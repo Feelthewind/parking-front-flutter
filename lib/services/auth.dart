@@ -23,6 +23,8 @@ class AuthService {
       final responseData = jsonDecode(response.body);
       print(responseData);
       token = responseData['accessToken'];
+      print('token');
+      print(token);
       return responseData;
     } catch (e) {
       print(e);

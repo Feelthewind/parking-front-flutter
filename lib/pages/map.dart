@@ -303,9 +303,18 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _onGeoEnded() async {
+    LatLngBounds bounds = await controller.getVisibleRegion();
+    var queryParameters = {
+      'xmin': bounds.southwest.latitude.toString(),
+      'ymin': bounds.southwest.longitude.toString(),
+      'xmax': bounds.northeast.latitude.toString(),
+      'ymax': bounds.northeast.longitude.toString(),
+    };
+
     if (zoom < 14.0) {
       print('Get parkings by clustering');
-      final clusters = await parkingService.getParkingsByClustering();
+      final clusters =
+          await parkingService.getParkingsByClustering(queryParameters);
       if (clusters != null) {
         _addClusters(clusters);
       }
@@ -320,7 +329,8 @@ class _MapPageState extends State<MapPage> {
       }
     } else if (zoom >= 14.0) {
       print('Get parkings by bounds');
-      final parkings = await parkingService.getParkingsByBounds();
+      final parkings =
+          await parkingService.getParkingsByBounds(queryParameters);
       _addParkings(parkings);
     }
   }
@@ -343,9 +353,17 @@ class _MapPageState extends State<MapPage> {
   void _onMapCreated(GoogleMapController controller) async {
     this.controller = controller;
 
-    parkingService = ParkingService(controller);
+    parkingService = ParkingService();
 
-    final parkings = await parkingService.getParkingsByBounds();
+    LatLngBounds bounds = await controller.getVisibleRegion();
+    var queryParameters = {
+      'xmin': bounds.southwest.latitude.toString(),
+      'ymin': bounds.southwest.longitude.toString(),
+      'xmax': bounds.northeast.latitude.toString(),
+      'ymax': bounds.northeast.longitude.toString(),
+    };
+
+    final parkings = await parkingService.getParkingsByBounds(queryParameters);
     if (parkings != null) {
       _addParkings(parkings);
     }

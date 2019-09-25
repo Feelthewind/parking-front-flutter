@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/pages/map.dart';
 import 'package:parking_flutter/pages/signin.dart';
 import 'package:parking_flutter/store/auth.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  setupLocator();
   runApp(MyApp());
   // debugPaintSizeEnabled = true;
 }
