@@ -24,6 +24,18 @@ abstract class _AuthStore with Store {
     }
   }
 
+  @action
+  Future<dynamic> saveSocialUser(String provider, String id) async {
+    try {
+      final result = await authService.saveSocialUser(provider, id);
+      token = result['accessToken'];
+      return result;
+    } catch (e) {
+      print('3');
+      throw e;
+    }
+  }
+
   // @action
   // Future<dynamic> socialLogin(String provider) async {
   //   try {

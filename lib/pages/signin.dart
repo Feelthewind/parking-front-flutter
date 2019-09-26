@@ -216,12 +216,7 @@ class _SigninPageState extends State<SigninPage> {
                           GestureDetector(
                             onTap: () async {
                               try {
-                                GoogleSignInAccount googleUser =
-                                    await _googleSignIn.signIn();
-                                GoogleSignInAuthentication googleAuth =
-                                    await googleUser.authentication;
-                                print(googleAuth.accessToken);
-                                print(googleAuth.idToken);
+                                socialLogin('google');
                               } catch (error) {
                                 print(error);
                               }
@@ -294,6 +289,25 @@ class _SigninPageState extends State<SigninPage> {
         ),
       ),
     );
+  }
+
+  socialLogin(String provider) async {
+    if (provider == 'google') {
+      googleLogin();
+    }
+  }
+
+  Future<void> googleLogin() async {
+    try {
+      GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      print(googleAuth.accessToken);
+      print(googleAuth.idToken);
+      AuthStore authStore = Provider.of<AuthStore>(context, listen: false);
+      authStore.saveSocialUser('google', googleAuth.idToken);
+    } catch (error) {
+      print(error);
+    }
   }
 
   void _submit() async {

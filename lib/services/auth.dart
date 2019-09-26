@@ -34,18 +34,27 @@ class AuthService {
     }
   }
 
-  googleLogin() async {
-    final url = '$BASE_URL/auth/google';
+  saveSocialUser(String provider, String id) async {
+    final url = '$BASE_URL/auth/social-login';
 
     try {
-      final response = await http.get(
+      final response = await http.post(
         url,
+        body: jsonEncode({
+          'provider': provider,
+          'id': id,
+        }),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
         },
       );
-      print(response.body);
-      return jsonDecode(response.body);
+
+      final responseData = jsonDecode(response.body);
+      print(responseData);
+      token = responseData['accessToken'];
+      print('token');
+      print(token);
+      return responseData;
     } catch (e) {
       print(e);
       throw e;
