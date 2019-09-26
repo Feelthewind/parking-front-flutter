@@ -15,7 +15,58 @@ class ParkingService {
   AuthService authService = locator<AuthService>();
   Dio dio = Dio();
 
+  Future<void> createParking(
+    Map<String, dynamic> parking,
+    // String price,
+    // String description,
+    // List<double> coordinates,
+    // List<String> images,
+    // List<Map<String, dynamic>> timezones,
+  ) async {
+    try {
+      var uri = Uri.http(BASE_URL, '/parking');
+      var response = await http.post(uri,
+          headers: <String, String>{
+            HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
+            HttpHeaders.contentTypeHeader: 'application/json',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode(parking));
+
+      print(response.body);
+
+      // final jsonResponse = jsonDecode(response.body);
+      // final ParkingList parkingList = ParkingList.fromJson(jsonResponse);
+
+      // print('=========================');
+      // print('=========================');
+      // print(parkingList);
+      // print(parkingList.parkings);
+
+      // return parkingList.parkings;
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
   Future<String> saveParkingImages(File image) async {
+    // try {
+    //   List uploadList = [];
+    //   for (var imageFile in images) {
+    //     uploadList.add(UploadFileInfo(imageFile, basename(imageFile.path)));
+    //   }
+    //   final response = await dio.post('http://$BASE_URL/parking/images',
+    //       data: FormData.from({
+    //         'images[]': uploadList,
+    //       }));
+
+    //   print(response);
+    //   // return response.data['url'];
+    // } catch (e) {
+    //   print(e);
+    //   throw e;
+    // }
     try {
       FormData formData = FormData();
 
