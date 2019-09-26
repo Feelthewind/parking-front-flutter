@@ -1,17 +1,15 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong/latlong.dart' as LatLngPlugin;
 import 'package:location/location.dart';
 import 'package:parking_flutter/models/cluster.dart';
-import 'package:parking_flutter/models/parking.dart';
 import 'package:parking_flutter/services/parking.dart';
+import 'package:parking_flutter/store/parking.dart';
+import 'package:parking_flutter/store/parkings.dart';
 import 'package:parking_flutter/widgets/parking_bottom_modal.dart';
 import 'package:parking_flutter/widgets/parking_expansion_tile.dart';
+import 'package:provider/provider.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -22,7 +20,7 @@ class _MapPageState extends State<MapPage> {
   GoogleMapController controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<MarkerId, String> prices = <MarkerId, String>{};
-  Map<MarkerId, Parking> parkings = <MarkerId, Parking>{};
+  Map<MarkerId, ParkingStore> parkings = <MarkerId, ParkingStore>{};
   MarkerId selectedMarker;
 
   LocationData currentLocation;
@@ -67,47 +65,7 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  void getParkings([double zoom = 10.0]) async {
-    if (zoom < 14.0) {
-      // get parkings by clustering
-    } else {
-      // get parkings by bounds
-
-      LatLngBounds bounds = await controller.getVisibleRegion();
-      print(bounds.southwest);
-      print(bounds.northeast);
-      // var queryParameters = {
-      //   'lat': '37.611538',
-      //   'lng': '127.140162',
-      // };
-      var queryParameters = {
-        'xmin': bounds.southwest.latitude.toString(),
-        'ymin': bounds.southwest.longitude.toString(),
-        'xmax': bounds.northeast.latitude.toString(),
-        'ymax': bounds.northeast.longitude.toString(),
-      };
-      var uri =
-          Uri.http('172.30.1.29:3000', '/parking/bounds', queryParameters);
-      var response = await http.get(uri, headers: <String, String>{
-        // HttpHeaders.authorizationHeader: 'Token $token',
-        HttpHeaders.contentTypeHeader: 'application/json',
-        'Accept': 'application/json',
-      });
-
-      print(response.body);
-
-      final dynamic jsonResponse = jsonDecode(response.body);
-      final ParkingList parkingList = ParkingList.fromJson(jsonResponse);
-
-      for (var i = 0; i < parkingList.parkings.length; i++) {
-        final lat = parkingList.parkings[i].coordinates[0];
-        final lng = parkingList.parkings[i].coordinates[1];
-        _add(lat, lng, parkingList.parkings[i]);
-      }
-    }
-  }
-
-  void _add(double lat, double lng, Parking parking) {
+  void _add(double lat, double lng, ParkingStore parking) {
     final String markerIdVal = parking.id.toString();
     final MarkerId markerId = MarkerId(markerIdVal);
 
@@ -303,35 +261,38 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _onGeoEnded() async {
-    LatLngBounds bounds = await controller.getVisibleRegion();
-    var queryParameters = {
-      'xmin': bounds.southwest.latitude.toString(),
-      'ymin': bounds.southwest.longitude.toString(),
-      'xmax': bounds.northeast.latitude.toString(),
-      'ymax': bounds.northeast.longitude.toString(),
-    };
+    try {
+      LatLngBounds bounds = await controller.getVisibleRegion();
+      var queryParameters = {
+        'xmin': bounds.southwest.latitude.toString(),
+        'ymin': bounds.southwest.longitude.toString(),
+        'xmax': bounds.northeast.latitude.toString(),
+        'ymax': bounds.northeast.longitude.toString(),
+      };
 
-    if (zoom < 14.0) {
-      print('Get parkings by clustering');
-      final clusters =
-          await parkingService.getParkingsByClustering(queryParameters);
-      if (clusters != null) {
-        _addClusters(clusters);
+      ParkingsStore parkingsStore =
+          Provider.of<ParkingsStore>(context, listen: false);
+
+      if (zoom < 14.0) {
+        print('Get parkings by clustering');
+        await parkingsStore.getParkingsByClustering(queryParameters);
+        _addClusters(parkingsStore.clusters);
+        final newCircles = Set<Circle>();
+        if (zoom < 13.0) {
+          _circles.forEach((c) {
+            newCircles.add(c.copyWith(radiusParam: (c.radius) * (14 - zoom)));
+          });
+          setState(() {
+            _circles = newCircles;
+          });
+        }
+      } else if (zoom >= 14.0) {
+        print('Get parkings by bounds');
+        await parkingsStore.getParkingsByBounds(queryParameters);
+        _addParkings(parkingsStore.parkings);
       }
-      final newCircles = Set<Circle>();
-      if (zoom < 13.0) {
-        _circles.forEach((c) {
-          newCircles.add(c.copyWith(radiusParam: (c.radius) * (14 - zoom)));
-        });
-        setState(() {
-          _circles = newCircles;
-        });
-      }
-    } else if (zoom >= 14.0) {
-      print('Get parkings by bounds');
-      final parkings =
-          await parkingService.getParkingsByBounds(queryParameters);
-      _addParkings(parkings);
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -353,8 +314,6 @@ class _MapPageState extends State<MapPage> {
   void _onMapCreated(GoogleMapController controller) async {
     this.controller = controller;
 
-    parkingService = ParkingService();
-
     LatLngBounds bounds = await controller.getVisibleRegion();
     var queryParameters = {
       'xmin': bounds.southwest.latitude.toString(),
@@ -363,31 +322,34 @@ class _MapPageState extends State<MapPage> {
       'ymax': bounds.northeast.longitude.toString(),
     };
 
-    final parkings = await parkingService.getParkingsByBounds(queryParameters);
-    if (parkings != null) {
-      _addParkings(parkings);
+    ParkingsStore parkingsStore =
+        Provider.of<ParkingsStore>(context, listen: false);
+
+    await parkingsStore.getParkingsByBounds(queryParameters);
+    if (parkingsStore.parkings.isNotEmpty) {
+      _addParkings(parkingsStore.parkings);
     }
   }
 
-  void _addParkings(ParkingList parkingList) async {
+  void _addParkings(List<ParkingStore> parkingList) async {
     setState(() {
       _circles = Set();
     });
-    for (var i = 0; i < parkingList.parkings.length; i++) {
-      final lat = parkingList.parkings[i].coordinates[0];
-      final lng = parkingList.parkings[i].coordinates[1];
-      _add(lat, lng, parkingList.parkings[i]);
+    for (var i = 0; i < parkingList.length; i++) {
+      final lat = parkingList[i].coordinates[0];
+      final lng = parkingList[i].coordinates[1];
+      _add(lat, lng, parkingList[i]);
     }
   }
 
-  void _addClusters(ClusterList clusters) {
+  void _addClusters(List<Cluster> clusters) {
     // TODO: Show count text within circle
     Set<Circle> newCircles = Set();
     int total = 0;
-    clusters.clusters.forEach((c) {
+    clusters.forEach((c) {
       total = total + int.parse(c.count);
     });
-    clusters.clusters.forEach((c) {
+    clusters.forEach((c) {
       newCircles.add(
         Circle(
           circleId: CircleId(c.center.toString()),

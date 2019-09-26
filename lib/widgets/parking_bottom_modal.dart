@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:parking_flutter/models/parking.dart';
+import 'package:parking_flutter/store/parking.dart';
 
 class ParkingBottomModal extends StatelessWidget {
-  final Parking parking;
+  final ParkingStore parking;
   final int count;
 
   ParkingBottomModal(this.parking, [this.count = 1]);
@@ -89,23 +89,23 @@ class ParkingBottomModal extends StatelessWidget {
                       ),
                     ],
                   ),
-                  RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                        text:
-                            parking.timezones.timezones[0].from.substring(0, 5),
-                        style: TextStyle(fontSize: 18, color: Colors.black),
-                      ),
-                      TextSpan(
-                        text: " ~ ",
-                        style: TextStyle(fontSize: 18, color: Colors.black),
-                      ),
-                      TextSpan(
-                        text: parking.timezones.timezones[0].to.substring(0, 5),
-                        style: TextStyle(fontSize: 18, color: Colors.black),
-                      ),
-                    ]),
-                  ),
+                  // RichText(
+                  //   text: TextSpan(children: [
+                  //     TextSpan(
+                  //       text:
+                  //           parking.timezones.timezones[0].from.substring(0, 5),
+                  //       style: TextStyle(fontSize: 18, color: Colors.black),
+                  //     ),
+                  //     TextSpan(
+                  //       text: " ~ ",
+                  //       style: TextStyle(fontSize: 18, color: Colors.black),
+                  //     ),
+                  //     TextSpan(
+                  //       text: parking.timezones.timezones[0].to.substring(0, 5),
+                  //       style: TextStyle(fontSize: 18, color: Colors.black),
+                  //     ),
+                  //   ]),
+                  // ),
                 ],
               ),
             ),

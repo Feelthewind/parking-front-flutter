@@ -4,6 +4,7 @@ import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/pages/map.dart';
 import 'package:parking_flutter/pages/signin.dart';
 import 'package:parking_flutter/store/auth.dart';
+import 'package:parking_flutter/store/parkings.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -17,11 +18,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(builder: (_) => Auth()),
+        Provider(builder: (_) => AuthStore()),
+        Provider(builder: (_) => ParkingsStore()),
       ],
       child: Observer(
         builder: (ctx) {
-          final auth = Provider.of<Auth>(ctx, listen: false);
+          final auth = Provider.of<AuthStore>(ctx, listen: false);
 
           return MaterialApp(
             title: 'Flutter Google Maps Demo',

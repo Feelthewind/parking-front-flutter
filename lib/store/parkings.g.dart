@@ -8,11 +8,38 @@ part of 'parkings.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$Parkings on _Parkings, Store {
-  final _$fetchParkingsAsyncAction = AsyncAction('fetchParkings');
+mixin _$ParkingsStore on _ParkingsStore, Store {
+  final _$parkingsAtom = Atom(name: '_ParkingsStore.parkings');
 
   @override
-  Future<void> fetchParkings([bool byCluster = false]) {
-    return _$fetchParkingsAsyncAction.run(() => super.fetchParkings(byCluster));
+  ObservableList<ParkingStore> get parkings {
+    _$parkingsAtom.context.enforceReadPolicy(_$parkingsAtom);
+    _$parkingsAtom.reportObserved();
+    return super.parkings;
+  }
+
+  @override
+  set parkings(ObservableList<ParkingStore> value) {
+    _$parkingsAtom.context.conditionallyRunInAction(() {
+      super.parkings = value;
+      _$parkingsAtom.reportChanged();
+    }, _$parkingsAtom, name: '${_$parkingsAtom.name}_set');
+  }
+
+  final _$getParkingsByBoundsAsyncAction = AsyncAction('getParkingsByBounds');
+
+  @override
+  Future<void> getParkingsByBounds(Map<String, String> parameters) {
+    return _$getParkingsByBoundsAsyncAction
+        .run(() => super.getParkingsByBounds(parameters));
+  }
+
+  final _$getParkingsByClusteringAsyncAction =
+      AsyncAction('getParkingsByClustering');
+
+  @override
+  Future<void> getParkingsByClustering(Map<String, String> parameters) {
+    return _$getParkingsByClusteringAsyncAction
+        .run(() => super.getParkingsByClustering(parameters));
   }
 }

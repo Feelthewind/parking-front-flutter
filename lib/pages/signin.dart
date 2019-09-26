@@ -276,7 +276,7 @@ class _SigninState extends State<Signin> {
       print(_authData['password']);
 
       // sign in using provider;
-      final authStore = Provider.of<Auth>(context, listen: false);
+      final authStore = Provider.of<AuthStore>(context, listen: false);
       await authStore.login(_authData['email'], _authData['password']);
     } catch (e) {
       print(e);

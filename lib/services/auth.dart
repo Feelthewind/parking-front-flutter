@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+const BASE_URL = 'http://172.30.1.22:3000';
+
 class AuthService {
   String token;
 
   Future<dynamic> authenticate(String email, String password) async {
-    final url = 'http://172.30.1.54:3000/auth/signin';
+    final url = '$BASE_URL/auth/signin';
 
     try {
       final response = await http.post(

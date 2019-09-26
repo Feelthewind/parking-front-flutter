@@ -7,16 +7,15 @@ import 'package:parking_flutter/models/cluster.dart';
 import 'package:parking_flutter/models/parking.dart';
 import 'package:parking_flutter/services/auth.dart';
 
+const BASE_URL = '172.30.1.22:3000';
+
 class ParkingService {
-  AuthService authService;
+  AuthService authService = locator<AuthService>();
 
-  Future<ParkingList> getParkingsByBounds(
+  Future<List<Parking>> getParkingsByBounds(
       Map<String, String> queryParameters) async {
-    authService = locator<AuthService>();
-
     try {
-      var uri =
-          Uri.http('172.30.1.54:3000', '/parking/bounds', queryParameters);
+      var uri = Uri.http(BASE_URL, '/parking/bounds', queryParameters);
       print('token');
       print(authService.token);
       var response = await http.get(uri, headers: <String, String>{
@@ -27,22 +26,27 @@ class ParkingService {
 
       print(response.body);
 
-      final dynamic jsonResponse = jsonDecode(response.body);
+      final jsonResponse = jsonDecode(response.body);
       final ParkingList parkingList = ParkingList.fromJson(jsonResponse);
 
-      return parkingList;
+      print('=========================');
+      print('=========================');
+      print(parkingList);
+      print(parkingList.parkings);
+
+      return parkingList.parkings;
     } catch (e) {
       print(e);
+      return null;
     }
   }
 
-  Future<ClusterList> getParkingsByClustering(
+  Future<List<Cluster>> getParkingsByClustering(
       Map<String, String> queryParameters) async {
     authService = locator<AuthService>();
 
     try {
-      var uri =
-          Uri.http('172.30.1.54:3000', '/parking/clustering', queryParameters);
+      var uri = Uri.http(BASE_URL, '/parking/clustering', queryParameters);
       var response = await http.get(uri, headers: <String, String>{
         HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
         HttpHeaders.contentTypeHeader: 'application/json',
@@ -52,7 +56,8 @@ class ParkingService {
       print(response.body);
 
       final dynamic jsonResponse = jsonDecode(response.body);
-      return ClusterList.fromJson(jsonResponse);
+      final ClusterList clusterList = ClusterList.fromJson(jsonResponse);
+      return clusterList.clusters;
     } catch (e) {
       print('error clustering');
       print(e);

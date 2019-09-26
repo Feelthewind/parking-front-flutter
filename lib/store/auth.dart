@@ -4,10 +4,10 @@ import 'package:parking_flutter/services/auth.dart';
 
 part 'auth.g.dart';
 
-class Auth = _Auth with _$Auth;
+class AuthStore = _AuthStore with _$AuthStore;
 
-abstract class _Auth with Store {
-  AuthService authService;
+abstract class _AuthStore with Store {
+  AuthService authService = locator<AuthService>();
 
   @observable
   String token;
@@ -15,8 +15,6 @@ abstract class _Auth with Store {
   @action
   Future<void> login(String email, String password) async {
     try {
-      authService = locator<AuthService>();
-
       final result = await authService.authenticate(email, password);
       token = result['accessToken'];
     } catch (e) {
