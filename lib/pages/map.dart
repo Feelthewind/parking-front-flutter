@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong/latlong.dart' as LatLngPlugin;
 import 'package:location/location.dart';
 import 'package:parking_flutter/models/cluster.dart';
+import 'package:parking_flutter/pages/create_parking.dart';
 import 'package:parking_flutter/services/parking.dart';
 import 'package:parking_flutter/store/parking.dart';
 import 'package:parking_flutter/store/parkings.dart';
@@ -152,7 +153,9 @@ class _MapPageState extends State<MapPage> {
               Icons.publish,
               color: Colors.white,
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, CreateParkingPage.routeName);
+            },
           )
         ],
       ),
@@ -201,6 +204,7 @@ class _MapPageState extends State<MapPage> {
                         backgroundColor: Colors.white,
                         elevation: 8.0,
                         mini: true,
+                        heroTag: 'btn1',
                       ),
                       FloatingActionButton(
                         child: Icon(
@@ -214,6 +218,7 @@ class _MapPageState extends State<MapPage> {
                         backgroundColor: Colors.white,
                         elevation: 8.0,
                         mini: true,
+                        heroTag: 'btn2',
                       ),
                     ],
                   ),
@@ -327,9 +332,13 @@ class _MapPageState extends State<MapPage> {
     ParkingsStore parkingsStore =
         Provider.of<ParkingsStore>(context, listen: false);
 
-    await parkingsStore.getParkingsByBounds(queryParameters);
-    if (parkingsStore.parkings.isNotEmpty) {
-      _addParkings(parkingsStore.parkings);
+    try {
+      await parkingsStore.getParkingsByBounds(queryParameters);
+      if (parkingsStore.parkings.isNotEmpty) {
+        _addParkings(parkingsStore.parkings);
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
