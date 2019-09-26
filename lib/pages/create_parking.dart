@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:parking_flutter/locator.dart';
+import 'package:parking_flutter/services/parking.dart';
 
 class CreateParkingPage extends StatefulWidget {
   static const routeName = '/create-parking';
@@ -8,6 +13,40 @@ class CreateParkingPage extends StatefulWidget {
 }
 
 class _CreateParkingPageState extends State<CreateParkingPage> {
+  Map<int, File> _images = {};
+
+  handleImagePicked(int order, File image, [String error]) {
+    print('handleimagepicked');
+    print('called');
+    Map<int, File> newImages = {};
+
+    newImages.addAll(_images);
+    newImages[order] = image;
+
+    setState(() {
+      _images = newImages;
+    });
+
+    if (error != null) {
+      // alert file limit
+    }
+  }
+
+  Future<void> saveImages() async {
+    try {
+      ParkingService parkingService = locator<ParkingService>();
+      Future.wait([
+        parkingService.saveParkingImages(_images[0]),
+        parkingService.saveParkingImages(_images[1]),
+      ]).then((urls) {
+        print(urls[0]);
+        print(urls[1]);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,14 +55,17 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
       appBar: AppBar(
         title: Text('거주자우선주차장 등록'),
         actions: <Widget>[
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Center(
-                child: Text(
-              '확인',
-              style: TextStyle(fontSize: 16),
-            )),
+          GestureDetector(
+            onTap: saveImages,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Center(
+                  child: Text(
+                '확인',
+                style: TextStyle(fontSize: 16),
+              )),
+            ),
           ),
         ],
       ),
@@ -196,9 +238,9 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
                       ),
                       Flexible(
                         fit: FlexFit.tight,
-                        flex: 5,
+                        flex: 6,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
@@ -211,45 +253,30 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
                             ),
                             SizedBox(height: 8),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: <Widget>[
-                                Spacer(),
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  child: Icon(Icons.add),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black),
-                                  ),
+                                ImagePickerBox(
+                                  order: 0,
+                                  image: _images[0],
+                                  onImagePicked: handleImagePicked,
                                 ),
-                                Container(
-                                  margin: const EdgeInsets.only(left: 12),
-                                  width: 60,
-                                  height: 60,
-                                  child: Icon(Icons.add),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black),
-                                  ),
+                                ImagePickerBox(
+                                  order: 1,
+                                  image: _images[1],
+                                  onImagePicked: handleImagePicked,
                                 ),
-                                Container(
-                                  margin: const EdgeInsets.only(left: 12),
-                                  width: 60,
-                                  height: 60,
-                                  child: Icon(Icons.add),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black),
-                                  ),
+                                ImagePickerBox(
+                                  order: 2,
+                                  image: _images[2],
+                                  onImagePicked: handleImagePicked,
                                 ),
-                                Container(
-                                  margin: const EdgeInsets.only(left: 12),
-                                  width: 60,
-                                  height: 60,
-                                  child: Icon(Icons.add),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black),
-                                  ),
+                                ImagePickerBox(
+                                  order: 3,
+                                  image: _images[3],
+                                  onImagePicked: handleImagePicked,
                                 ),
                               ],
-                            ),
+                            )
                           ],
                         ),
                       ),
@@ -262,5 +289,72 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
         },
       ),
     );
+  }
+
+  // Widget _buildImageBoxes() {
+  //   List<Widget> list = List<Widget>();
+  //   for (var i = 0; i < _images.length; i++) {
+  //     list.add(ImagePickerBox(
+  //       image: _images[i],
+  //       order: i,
+  //       onImagePicked: handleImagePicked,
+  //     ));
+  //   }
+  //   return Row(children: list);
+  // }
+}
+
+class ImagePickerBox extends StatelessWidget {
+  final int order;
+  final File image;
+  final Function onImagePicked;
+
+  ImagePickerBox({this.order, this.image, this.onImagePicked});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: GestureDetector(
+        onTap: () => getImage(order),
+        child: image != null
+            ? Container(
+                width: 60,
+                height: 60,
+                child: Image.file(image),
+              )
+            : Container(
+                width: 60,
+                height: 60,
+                child: Icon(Icons.add),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                ),
+              ),
+      ),
+    );
+  }
+
+  Future<void> getImage(int order) async {
+    try {
+      var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+      print(image);
+      print(order);
+
+      final fileSize = await image.length();
+
+      print(fileSize);
+
+      if (fileSize > 5 * 1024 * 1024) {
+        print('filesize is too large');
+        return onImagePicked(order, null, '파일 용량 5메가 바이트 이상은 불가');
+      }
+
+      // callback
+      onImagePicked(order, image);
+    } catch (e) {
+      print(e);
+      onImagePicked(order, null);
+    }
   }
 }

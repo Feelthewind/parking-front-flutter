@@ -1,16 +1,52 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/models/cluster.dart';
 import 'package:parking_flutter/models/parking.dart';
 import 'package:parking_flutter/services/auth.dart';
+import 'package:path/path.dart';
 
 const BASE_URL = '172.30.1.22:3000';
 
 class ParkingService {
   AuthService authService = locator<AuthService>();
+  Dio dio = Dio();
+
+  Future<String> saveParkingImages(File image) async {
+    try {
+      FormData formData = FormData();
+
+      formData.add("files", new UploadFileInfo(image, basename(image.path)));
+
+      final response =
+          await dio.post('http://$BASE_URL/parking/images', data: formData);
+
+      print(response);
+      return response.data['url'];
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+
+    // var uri = Uri.parse('http://$BASE_URL/parking/images');
+    // var bytes = await image.readAsBytes();
+
+    // var request = http.MultipartRequest("POST", uri);
+
+    // var a = http.MultipartFile.fromBytes(
+    //   'files',
+    //   bytes,
+    // );
+
+    // // request.fields['files'] = 'someone@somewhere.com';
+    // request.files.add(a);
+    // request.send().then((response) {
+    //   if (response.statusCode == 200) print("Uploaded!");
+    // });
+  }
 
   Future<List<Parking>> getParkingsByBounds(
       Map<String, String> queryParameters) async {
