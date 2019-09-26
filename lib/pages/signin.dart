@@ -1,24 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:parking_flutter/colors.dart';
 import 'package:parking_flutter/store/auth.dart';
 import 'package:provider/provider.dart';
 
-class Signin extends StatefulWidget {
+import 'map.dart';
+
+class SigninPage extends StatefulWidget {
+  static const routeName = '/signin';
+
   @override
-  _SigninState createState() => _SigninState();
+  _SigninPageState createState() => _SigninPageState();
 }
 
-class _SigninState extends State<Signin> {
+class _SigninPageState extends State<SigninPage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   Map<String, String> _authData = {
     'email': '',
     'password': '',
   };
   var _isLoading = false;
+  GoogleSignIn _googleSignIn;
 
   @override
   void initState() {
     super.initState();
+
+    _googleSignIn = GoogleSignIn(
+      scopes: [
+        'email',
+        // 'https://www.googleapis.com/auth/contacts.readonly',
+      ],
+    );
   }
 
   @override
@@ -144,12 +157,20 @@ class _SigninState extends State<Signin> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(
-                              '모두의주차장 둘러보기',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                decoration: TextDecoration.underline,
+                            GestureDetector(
+                              child: Text(
+                                '모두의주차장 둘러보기',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
+                              onTap: () {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  MapPage.routeName,
+                                );
+                              },
                             ),
                             Text(
                               '비밀번호 찾기',
@@ -192,24 +213,38 @@ class _SigninState extends State<Signin> {
                               size: 32,
                             ),
                           ),
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(0xff235caa),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color(0xff235caa),
-                                  blurRadius: 1.0,
-                                  spreadRadius: 1.0,
-                                )
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.face,
-                              color: Colors.white,
-                              size: 32,
+                          GestureDetector(
+                            onTap: () async {
+                              try {
+                                GoogleSignInAccount googleUser =
+                                    await _googleSignIn.signIn();
+                                GoogleSignInAuthentication googleAuth =
+                                    await googleUser.authentication;
+                                print(googleAuth.accessToken);
+                                print(googleAuth.idToken);
+                              } catch (error) {
+                                print(error);
+                              }
+                            },
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xff235caa),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xff235caa),
+                                    blurRadius: 1.0,
+                                    spreadRadius: 1.0,
+                                  )
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.face,
+                                color: Colors.white,
+                                size: 32,
+                              ),
                             ),
                           ),
                           Container(
@@ -270,21 +305,42 @@ class _SigninState extends State<Signin> {
       _isLoading = true;
     });
 
+    // sign in using provider;
+    final authStore = Provider.of<AuthStore>(context, listen: false);
     try {
-      print('===========');
-      print(_authData['email']);
-      print(_authData['password']);
-
-      // sign in using provider;
-      final authStore = Provider.of<AuthStore>(context, listen: false);
-      await authStore.login(_authData['email'], _authData['password']);
+      // {statusCode: 401, error: Unauthorized, message: Invalid credentials}
+      final result =
+          await authStore.login(_authData['email'], _authData['password']);
+      if (result['error'] != null) {
+        _showErrorDialog(result['message']);
+      }
     } catch (e) {
-      print(e);
+      var errorMessage = 'Could not authenticate you. Please try again later.';
+      _showErrorDialog(errorMessage);
     }
 
     setState(() {
       _isLoading = false;
     });
+  }
+
+  void _showErrorDialog(String message) {
+    print('show dialog called');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('An Error Occured!'),
+        content: Text(message),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
   }
 
   String validateEmail(String value) {

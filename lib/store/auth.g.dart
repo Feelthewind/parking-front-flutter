@@ -29,7 +29,7 @@ mixin _$AuthStore on _AuthStore, Store {
   final _$loginAsyncAction = AsyncAction('login');
 
   @override
-  Future<void> login(String email, String password) {
+  Future<dynamic> login(String email, String password) {
     return _$loginAsyncAction.run(() => super.login(email, password));
   }
 }

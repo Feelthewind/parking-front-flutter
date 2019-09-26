@@ -19,7 +19,7 @@ class ParkingService {
       print('token');
       print(authService.token);
       var response = await http.get(uri, headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
+        // HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
         HttpHeaders.contentTypeHeader: 'application/json',
         'Accept': 'application/json',
       });
@@ -37,7 +37,7 @@ class ParkingService {
       return parkingList.parkings;
     } catch (e) {
       print(e);
-      return null;
+      throw e;
     }
   }
 
@@ -48,7 +48,7 @@ class ParkingService {
     try {
       var uri = Uri.http(BASE_URL, '/parking/clustering', queryParameters);
       var response = await http.get(uri, headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
+        // HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
         HttpHeaders.contentTypeHeader: 'application/json',
         'Accept': 'application/json',
       });
@@ -61,7 +61,7 @@ class ParkingService {
     } catch (e) {
       print('error clustering');
       print(e);
-      return null;
+      throw e;
     }
   }
 }

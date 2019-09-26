@@ -26,6 +26,23 @@ mixin _$ParkingsStore on _ParkingsStore, Store {
     }, _$parkingsAtom, name: '${_$parkingsAtom.name}_set');
   }
 
+  final _$clustersAtom = Atom(name: '_ParkingsStore.clusters');
+
+  @override
+  ObservableList<Cluster> get clusters {
+    _$clustersAtom.context.enforceReadPolicy(_$clustersAtom);
+    _$clustersAtom.reportObserved();
+    return super.clusters;
+  }
+
+  @override
+  set clusters(ObservableList<Cluster> value) {
+    _$clustersAtom.context.conditionallyRunInAction(() {
+      super.clusters = value;
+      _$clustersAtom.reportChanged();
+    }, _$clustersAtom, name: '${_$clustersAtom.name}_set');
+  }
+
   final _$getParkingsByBoundsAsyncAction = AsyncAction('getParkingsByBounds');
 
   @override

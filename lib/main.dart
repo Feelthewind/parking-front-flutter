@@ -27,8 +27,12 @@ class MyApp extends StatelessWidget {
 
           return MaterialApp(
             title: 'Flutter Google Maps Demo',
-            home: auth.token != null ? MapPage() : Signin(),
             debugShowCheckedModeBanner: false,
+            home: auth.token != null ? MapPage() : SigninPage(),
+            routes: {
+              SigninPage.routeName: (_) => SigninPage(),
+              MapPage.routeName: (_) => MapPage(),
+            },
           );
         },
       ),

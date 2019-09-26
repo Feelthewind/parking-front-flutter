@@ -13,12 +13,25 @@ abstract class _AuthStore with Store {
   String token;
 
   @action
-  Future<void> login(String email, String password) async {
+  Future<dynamic> login(String email, String password) async {
     try {
       final result = await authService.authenticate(email, password);
       token = result['accessToken'];
+      return result;
     } catch (e) {
+      print('3');
       throw e;
     }
   }
+
+  // @action
+  // Future<dynamic> socialLogin(String provider) async {
+  //   try {
+  //     final result = await authService.googleLogin();
+  //     token = result['accessToken'];
+  //   } catch (e) {
+  //     print('4');
+  //     throw e;
+  //   }
+  // }
 }

@@ -37,7 +37,7 @@ abstract class _ParkingsStore with Store {
       parkings = ObservableList.of(parkingsResult);
     } catch (e) {
       print(e);
-      return null;
+      throw e;
     }
   }
 
@@ -49,7 +49,7 @@ abstract class _ParkingsStore with Store {
       // clusters = ObservableList.of(result.clusters);
     } catch (e) {
       print(e);
-      return null;
+      throw e;
     }
   }
 }

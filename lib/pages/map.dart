@@ -12,6 +12,8 @@ import 'package:parking_flutter/widgets/parking_expansion_tile.dart';
 import 'package:provider/provider.dart';
 
 class MapPage extends StatefulWidget {
+  static const routeName = '/map';
+
   @override
   _MapPageState createState() => _MapPageState();
 }

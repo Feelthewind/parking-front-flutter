@@ -33,4 +33,22 @@ class AuthService {
       throw e;
     }
   }
+
+  googleLogin() async {
+    final url = '$BASE_URL/auth/google';
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
+      print(response.body);
+      return jsonDecode(response.body);
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
 }
