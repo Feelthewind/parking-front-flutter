@@ -275,8 +275,11 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
                                       _parkingData['price'] = value;
                                     },
                                     validator: (val) {
-                                      if (double.tryParse(val) == null) {
+                                      final parsedVal = int.tryParse(val);
+                                      if (parsedVal == null) {
                                         return '숫자만 입력이 가능합니다.';
+                                      } else if (parsedVal % 100 != 0) {
+                                        return '100원 단위 이하로는 불가';
                                       }
                                       return null;
                                     },

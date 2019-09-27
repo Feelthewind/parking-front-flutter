@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:parking_flutter/colors.dart';
+import 'package:parking_flutter/locator.dart';
+import 'package:parking_flutter/services/order.dart';
+import 'package:parking_flutter/store/parking.dart';
+import 'package:parking_flutter/widgets/time_dialog.dart';
 
 class OrderParkingPage extends StatefulWidget {
   static const routeName = '/order-parking';
@@ -8,8 +12,50 @@ class OrderParkingPage extends StatefulWidget {
 }
 
 class _OrderParkingPageState extends State<OrderParkingPage> {
+  ParkingStore parking;
+  int minutes = 30;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(OrderParkingPage oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+  }
+
+  _showTimeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return TimeDialog(minutes);
+      },
+    ).then((val) {
+      if (val != null) {
+        setState(() {
+          minutes = val;
+        });
+      }
+    });
+  }
+
+  _createOrder() async {
+    OrderService orderService = locator<OrderService>();
+    await orderService.orderParking({
+      "parkingId": parking.id,
+      "from": parking.timezones[0].from,
+      "to": parking.timezones[0].to,
+      "minutes": minutes,
+      "cardNumber": "00모0000",
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('rebuild');
+    parking = ModalRoute.of(context).settings.arguments as ParkingStore;
     return Scaffold(
       appBar: AppBar(
         title: Text('광진 공유주차장 #990916'),
@@ -41,9 +87,25 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
                         style:
                             TextStyle(color: Colors.blueAccent, fontSize: 20),
                       ),
-                      Text(
-                        '1시간',
-                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      GestureDetector(
+                        onTap: _showTimeDialog,
+                        child: RichText(
+                          text: TextSpan(children: [
+                            TextSpan(
+                              text: '${minutes.toString()}분',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 24),
+                            ),
+                            WidgetSpan(
+                              style: TextStyle(fontSize: 24),
+                              alignment: PlaceholderAlignment.middle,
+                              child: Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ]),
+                        ),
                       ),
                     ],
                   ),
@@ -58,9 +120,25 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
                           fontSize: 20,
                         ),
                       ),
-                      Text(
-                        '00모0000',
-                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      RichText(
+                        text: TextSpan(children: [
+                          TextSpan(
+                            text: "00모0000",
+                            style: TextStyle(color: Colors.white, fontSize: 24),
+                          ),
+                          WidgetSpan(
+                            style: TextStyle(fontSize: 24),
+                            alignment: PlaceholderAlignment.middle,
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Icon(
+                                Icons.create,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ]),
                       ),
                     ],
                   ),
@@ -93,7 +171,7 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
                         style: TextStyle(color: Colors.grey, fontSize: 20.0),
                       ),
                       Text(
-                        '1,200원',
+                        '${(int.parse(parking.price.substring(1)) * (minutes / 30)).ceil()}원',
                         style: TextStyle(color: Colors.black, fontSize: 24.0),
                       ),
                     ],
@@ -121,9 +199,12 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
             child: SizedBox(
               width: double.infinity,
               child: RaisedButton(
-                color: primaryBlueColor.withOpacity(0.8),
-                child: Text('구매하기'),
-                onPressed: () {},
+                color: Colors.lightBlue,
+                child: Text(
+                  '구매하기',
+                  style: TextStyle(color: Colors.white, fontSize: 28),
+                ),
+                onPressed: _createOrder,
               ),
             ),
           ),
