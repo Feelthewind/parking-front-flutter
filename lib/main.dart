@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/pages/create_parking.dart';
 import 'package:parking_flutter/pages/map.dart';
+import 'package:parking_flutter/pages/order_parking.dart';
 import 'package:parking_flutter/pages/signin.dart';
 import 'package:parking_flutter/store/auth.dart';
 import 'package:parking_flutter/store/parkings.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
               SigninPage.routeName: (_) => SigninPage(),
               MapPage.routeName: (_) => MapPage(),
               CreateParkingPage.routeName: (_) => CreateParkingPage(),
+              OrderParkingPage.routeName: (_) => OrderParkingPage(),
             },
           );
         },

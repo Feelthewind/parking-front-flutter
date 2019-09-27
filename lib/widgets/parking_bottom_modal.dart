@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:parking_flutter/colors.dart';
+import 'package:parking_flutter/pages/order_parking.dart';
 import 'package:parking_flutter/store/parking.dart';
 
 class ParkingBottomModal extends StatelessWidget {
@@ -10,10 +12,11 @@ class ParkingBottomModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200.0,
+      height: 230.0,
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.only(left: 32, right: 32, top: 32, bottom: 2),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -106,6 +109,19 @@ class ParkingBottomModal extends StatelessWidget {
                     ]),
                   ),
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                color: primaryBlueColor,
+                child: Text(
+                  '구매하기',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, OrderParkingPage.routeName);
+                },
               ),
             ),
           ],
