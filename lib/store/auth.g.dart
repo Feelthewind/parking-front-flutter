@@ -32,4 +32,12 @@ mixin _$AuthStore on _AuthStore, Store {
   Future<dynamic> login(String email, String password) {
     return _$loginAsyncAction.run(() => super.login(email, password));
   }
+
+  final _$saveSocialUserAsyncAction = AsyncAction('saveSocialUser');
+
+  @override
+  Future<dynamic> saveSocialUser(String provider, String id) {
+    return _$saveSocialUserAsyncAction
+        .run(() => super.saveSocialUser(provider, id));
+  }
 }

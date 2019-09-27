@@ -34,6 +34,7 @@ class ParkingService {
           body: jsonEncode(parking));
 
       print(response.body);
+      return;
 
       // final jsonResponse = jsonDecode(response.body);
       // final ParkingList parkingList = ParkingList.fromJson(jsonResponse);

@@ -89,23 +89,22 @@ class ParkingBottomModal extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // RichText(
-                  //   text: TextSpan(children: [
-                  //     TextSpan(
-                  //       text:
-                  //           parking.timezones.timezones[0].from.substring(0, 5),
-                  //       style: TextStyle(fontSize: 18, color: Colors.black),
-                  //     ),
-                  //     TextSpan(
-                  //       text: " ~ ",
-                  //       style: TextStyle(fontSize: 18, color: Colors.black),
-                  //     ),
-                  //     TextSpan(
-                  //       text: parking.timezones.timezones[0].to.substring(0, 5),
-                  //       style: TextStyle(fontSize: 18, color: Colors.black),
-                  //     ),
-                  //   ]),
-                  // ),
+                  RichText(
+                    text: TextSpan(children: [
+                      TextSpan(
+                        text: parking.timezones[0].from.substring(0, 5),
+                        style: TextStyle(fontSize: 18, color: Colors.black),
+                      ),
+                      TextSpan(
+                        text: " ~ ",
+                        style: TextStyle(fontSize: 18, color: Colors.black),
+                      ),
+                      TextSpan(
+                        text: parking.timezones[0].to.substring(0, 5),
+                        style: TextStyle(fontSize: 18, color: Colors.black),
+                      ),
+                    ]),
+                  ),
                 ],
               ),
             ),

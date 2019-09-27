@@ -31,6 +31,7 @@ abstract class _ParkingsStore with Store {
           coordinates: parking.coordinates,
           isAvailable: parking.isAvailable,
           price: parking.price,
+          timezones: parking.timezones.timezones,
           // timezones: parking.timezones,
         );
       });

@@ -18,9 +18,9 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
   Map<String, dynamic> _parkingData = {
     "price": "",
     "description": "",
-    "lat": 29.492999,
-    "lng": 32.294911,
-    "images": ["djfkdjfk", "dfjkdfjkd"],
+    "lat": 37.608267,
+    "lng": 127.141247,
+    "images": [],
     "timezones": [
       {"day": 0, "from": "00:00:00", "to": "24:00:00"},
       {"day": 1, "from": "00:00:00", "to": "12:00:00"},
@@ -33,17 +33,26 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
   };
 
   void _submit() async {
-    // if (!_formKey.currentState.validate()) {
-    //   return;
-    // }
+    // TODO: Get real coordinates using public api
+
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
     _formKey.currentState.save();
+
+    final urls = await _saveImages();
+    print('urls');
+    print(urls);
+    if (urls == null) {
+      return;
+    }
 
     ParkingService parkingService = locator<ParkingService>();
     try {
       // {statusCode: 401, error: Unauthorized, message: Invalid credentials}
-      await parkingService.createParking(
-        _parkingData,
-      );
+      _parkingData["images"] = urls;
+      await parkingService.createParking(_parkingData);
+      Navigator.pop(context);
     } catch (e) {
       print(e);
     }
@@ -62,26 +71,25 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
     });
 
     if (error != null) {
-      // alert file limit
+      // TODO: alert file limit
     }
   }
 
-  Future<void> saveImages() async {
+  Future<dynamic> _saveImages() async {
     try {
       ParkingService parkingService = locator<ParkingService>();
-      Future.wait([
-        parkingService.saveParkingImages(_images[0]),
-        parkingService.saveParkingImages(_images[1]),
-        parkingService.saveParkingImages(_images[2]),
-        parkingService.saveParkingImages(_images[3]),
-      ]).then((urls) {
-        print(urls[0]);
-        print(urls[1]);
-        print(urls[2]);
-        print(urls[3]);
+      _images.removeWhere((order, file) {
+        if (file == null) return true;
+        return false;
       });
+      List<Future<String>> result = [];
+      for (var i = 0; i < _images.length; i++) {
+        result.add(parkingService.saveParkingImages(_images[i]));
+      }
+      return Future.wait(result);
     } catch (e) {
       print(e);
+      return null;
     }
   }
 
@@ -247,6 +255,7 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
                           fit: FlexFit.tight,
                           flex: 1,
                           child: Container(
+                            height: 24,
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(color: Colors.black),
@@ -260,10 +269,16 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
                                 ),
                                 Spacer(),
                                 Container(
-                                  width: 110,
+                                  width: 140,
                                   child: TextFormField(
                                     onSaved: (value) {
                                       _parkingData['price'] = value;
+                                    },
+                                    validator: (val) {
+                                      if (double.tryParse(val) == null) {
+                                        return '숫자만 입력이 가능합니다.';
+                                      }
+                                      return null;
                                     },
                                     textAlign: TextAlign.right,
                                     maxLines: 1,

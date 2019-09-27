@@ -1,5 +1,5 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:mobx/mobx.dart';
+import 'package:parking_flutter/models/parking.dart';
 
 part 'parking.g.dart';
 
@@ -9,7 +9,8 @@ class ParkingStore extends _ParkingStore with _$ParkingStore {
     bool isAvailable,
     String price,
     List<double> coordinates,
-  }) : super(id, isAvailable, price, coordinates);
+    List<Timezone> timezones,
+  }) : super(id, isAvailable, price, coordinates, timezones);
 }
 
 abstract class _ParkingStore with Store {
@@ -18,10 +19,12 @@ abstract class _ParkingStore with Store {
     this.isAvailable,
     this.price,
     this.coordinates,
+    this.timezones,
   );
 
   int id;
   bool isAvailable;
   String price;
   List<double> coordinates;
+  List<Timezone> timezones;
 }
