@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/pages/create_parking.dart';
 import 'package:parking_flutter/pages/map.dart';
+import 'package:parking_flutter/pages/order_detail.dart';
 import 'package:parking_flutter/pages/order_parking.dart';
 import 'package:parking_flutter/pages/signin.dart';
 import 'package:parking_flutter/store/auth.dart';
@@ -30,7 +31,8 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Google Maps Demo',
             debugShowCheckedModeBanner: false,
-            home: auth.token != null ? MapPage() : SigninPage(),
+            // home: auth.token != null ? MapPage() : SigninPage(),
+            home: OrderDetailPage(),
             routes: {
               SigninPage.routeName: (_) => SigninPage(),
               MapPage.routeName: (_) => MapPage(),
