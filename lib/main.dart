@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/pages/create_parking.dart';
@@ -7,13 +8,14 @@ import 'package:parking_flutter/pages/order_detail.dart';
 import 'package:parking_flutter/pages/order_parking.dart';
 import 'package:parking_flutter/pages/signin.dart';
 import 'package:parking_flutter/store/auth.dart';
+import 'package:parking_flutter/store/orders.dart';
 import 'package:parking_flutter/store/parkings.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   setupLocator();
   runApp(MyApp());
-  // debugPaintSizeEnabled = true;
+  debugPaintSizeEnabled = true;
 }
 
 class MyApp extends StatelessWidget {
@@ -23,6 +25,7 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider(builder: (_) => AuthStore()),
         Provider(builder: (_) => ParkingsStore()),
+        Provider(builder: (_) => OrdersStore()),
       ],
       child: Observer(
         builder: (ctx) {
@@ -31,8 +34,8 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Google Maps Demo',
             debugShowCheckedModeBanner: false,
-            // home: auth.token != null ? MapPage() : SigninPage(),
-            home: OrderDetailPage(),
+            home: auth.token != null ? OrderDetailPage() : SigninPage(),
+            // home: OrderDetailPage(),
             routes: {
               SigninPage.routeName: (_) => SigninPage(),
               MapPage.routeName: (_) => MapPage(),

@@ -19,26 +19,33 @@ class Parking {
   final int id;
   final bool isAvailable;
   final String price;
+  final String description;
   final List<double> coordinates;
+  final List<String> images;
   final TimezoneList timezones;
 
   Parking({
     this.id,
     this.isAvailable,
     this.price,
+    this.description,
     this.coordinates,
+    this.images,
     this.timezones,
   });
 
   factory Parking.fromJson(Map<String, dynamic> json) {
     List<double> coordinates = new List<double>.from(json['coordinates']);
+    List<String> images = new List<String>.from(json['images']);
     List<dynamic> timezonesJson = new List<dynamic>.from(json['timezones']);
 
     return new Parking(
       id: json['id'],
       isAvailable: json['isAvailable'],
       price: json['price'],
+      description: json['description'],
       coordinates: coordinates,
+      images: images,
       timezones: TimezoneList.fromJson(timezonesJson),
     );
   }

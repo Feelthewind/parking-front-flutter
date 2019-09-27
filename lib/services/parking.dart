@@ -7,9 +7,8 @@ import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/models/cluster.dart';
 import 'package:parking_flutter/models/parking.dart';
 import 'package:parking_flutter/services/auth.dart';
+import 'package:parking_flutter/shared/const.dart';
 import 'package:path/path.dart';
-
-const BASE_URL = '172.30.1.22:3000';
 
 class ParkingService {
   AuthService authService = locator<AuthService>();

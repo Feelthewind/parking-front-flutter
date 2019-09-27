@@ -2,14 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-
-const BASE_URL = 'http://172.30.1.22:3000';
+import 'package:parking_flutter/shared/const.dart';
 
 class AuthService {
   String token;
 
   Future<dynamic> authenticate(String email, String password) async {
-    final url = '$BASE_URL/auth/signin';
+    final url = 'http://$BASE_URL/auth/signin';
 
     try {
       final response = await http.post(
@@ -35,7 +34,7 @@ class AuthService {
   }
 
   saveSocialUser(String provider, String id) async {
-    final url = '$BASE_URL/auth/social-login';
+    final url = 'http://$BASE_URL/auth/social-login';
 
     try {
       final response = await http.post(
