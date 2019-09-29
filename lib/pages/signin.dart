@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:parking_flutter/colors.dart';
+import 'package:parking_flutter/shared/colors.dart';
 import 'package:parking_flutter/store/auth.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +15,7 @@ class SigninPage extends StatefulWidget {
 
 class _SigninPageState extends State<SigninPage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  Map<String, String> _authData = {
+  final Map<String, String> _authData = {
     'email': '',
     'password': '',
   };
@@ -112,6 +112,7 @@ class _SigninPageState extends State<SigninPage> {
                             if (value.isEmpty || value.length < 5) {
                               return '최소 5자리 이상';
                             }
+                            return null;
                           },
                           onSaved: (value) {
                             _authData['password'] = value;
@@ -291,7 +292,7 @@ class _SigninPageState extends State<SigninPage> {
     );
   }
 
-  socialLogin(String provider) async {
+  void socialLogin(String provider) async {
     if (provider == 'google') {
       googleLogin();
     }
@@ -304,7 +305,7 @@ class _SigninPageState extends State<SigninPage> {
       print(googleAuth.accessToken);
       print(googleAuth.idToken);
       AuthStore authStore = Provider.of<AuthStore>(context, listen: false);
-      authStore.saveSocialUser('google', googleAuth.idToken);
+      authStore.socialLogin('google', googleAuth.idToken);
     } catch (error) {
       print(error);
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:parking_flutter/colors.dart';
 import 'package:parking_flutter/pages/order_parking.dart';
+import 'package:parking_flutter/shared/colors.dart';
 import 'package:parking_flutter/store/parking.dart';
 
 class ParkingBottomModal extends StatelessWidget {

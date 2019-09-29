@@ -8,6 +8,7 @@ import 'package:parking_flutter/pages/create_parking.dart';
 import 'package:parking_flutter/services/parking.dart';
 import 'package:parking_flutter/store/parking.dart';
 import 'package:parking_flutter/store/parkings.dart';
+import 'package:parking_flutter/widgets/app_drawer.dart';
 import 'package:parking_flutter/widgets/parking_bottom_modal.dart';
 import 'package:parking_flutter/widgets/parking_expansion_tile.dart';
 import 'package:provider/provider.dart';
@@ -143,10 +144,10 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {},
-        ),
+        // leading: IconButton(
+        //   icon: Icon(Icons.menu),
+        //   onPressed: () {},
+        // ),
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -159,6 +160,7 @@ class _MapPageState extends State<MapPage> {
           )
         ],
       ),
+      drawer: AppDrawer(),
       body: Stack(
         children: <Widget>[
           currentLocation != null

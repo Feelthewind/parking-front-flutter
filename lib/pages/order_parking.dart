@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:parking_flutter/colors.dart';
 import 'package:parking_flutter/locator.dart';
+import 'package:parking_flutter/services/auth.dart';
 import 'package:parking_flutter/services/order.dart';
+import 'package:parking_flutter/shared/colors.dart';
+import 'package:parking_flutter/store/orders.dart';
 import 'package:parking_flutter/store/parking.dart';
 import 'package:parking_flutter/widgets/time_dialog.dart';
+import 'package:provider/provider.dart';
 
 class OrderParkingPage extends StatefulWidget {
   static const routeName = '/order-parking';
@@ -43,6 +46,8 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
 
   _createOrder() async {
     OrderService orderService = locator<OrderService>();
+    AuthService authService = locator<AuthService>();
+    OrdersStore ordersStore = Provider.of<OrdersStore>(context, listen: false);
     await orderService.orderParking({
       "parkingId": parking.id,
       "from": parking.timezones[0].from,
@@ -50,6 +55,7 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
       "minutes": minutes,
       "cardNumber": "00모0000",
     });
+    await ordersStore.getLatestOrder();
   }
 
   @override

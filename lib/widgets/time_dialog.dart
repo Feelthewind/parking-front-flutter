@@ -14,10 +14,11 @@ class _TimeDialogState extends State<TimeDialog> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     minutes = widget.minutes;
   }
+
+  // TODO: Use actual available time slots info from server
 
   @override
   Widget build(BuildContext context) {

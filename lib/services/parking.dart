@@ -7,7 +7,7 @@ import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/models/cluster.dart';
 import 'package:parking_flutter/models/parking.dart';
 import 'package:parking_flutter/services/auth.dart';
-import 'package:parking_flutter/shared/const.dart';
+import 'package:parking_flutter/shared/constants.dart';
 import 'package:path/path.dart';
 
 class ParkingService {
@@ -147,6 +147,26 @@ class ParkingService {
       return clusterList.clusters;
     } catch (e) {
       print('error clustering');
+      print(e);
+      throw e;
+    }
+  }
+
+  Future getTimeToExtend(int parkingId) async {
+    authService = locator<AuthService>();
+
+    try {
+      var uri = Uri.http(BASE_URL, '/parking/extension/$parkingId');
+      var response = await http.get(uri, headers: <String, String>{
+        HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
+        HttpHeaders.contentTypeHeader: 'application/json',
+        'Accept': 'application/json',
+      });
+
+      print(response.body);
+
+      return response.body;
+    } catch (e) {
       print(e);
       throw e;
     }

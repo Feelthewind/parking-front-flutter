@@ -43,10 +43,42 @@ mixin _$OrdersStore on _OrdersStore, Store {
     }, _$currentOrderAtom, name: '${_$currentOrderAtom.name}_set');
   }
 
+  final _$timeToExtendAtom = Atom(name: '_OrdersStore.timeToExtend');
+
+  @override
+  String get timeToExtend {
+    _$timeToExtendAtom.context.enforceReadPolicy(_$timeToExtendAtom);
+    _$timeToExtendAtom.reportObserved();
+    return super.timeToExtend;
+  }
+
+  @override
+  set timeToExtend(String value) {
+    _$timeToExtendAtom.context.conditionallyRunInAction(() {
+      super.timeToExtend = value;
+      _$timeToExtendAtom.reportChanged();
+    }, _$timeToExtendAtom, name: '${_$timeToExtendAtom.name}_set');
+  }
+
   final _$getLatestOrderAsyncAction = AsyncAction('getLatestOrder');
 
   @override
   Future<void> getLatestOrder() {
     return _$getLatestOrderAsyncAction.run(() => super.getLatestOrder());
+  }
+
+  final _$cancelOrderAsyncAction = AsyncAction('cancelOrder');
+
+  @override
+  Future<void> cancelOrder() {
+    return _$cancelOrderAsyncAction.run(() => super.cancelOrder());
+  }
+
+  final _$extendOrderTimeAsyncAction = AsyncAction('extendOrderTime');
+
+  @override
+  Future<void> extendOrderTime(int timeToExtend) {
+    return _$extendOrderTimeAsyncAction
+        .run(() => super.extendOrderTime(timeToExtend));
   }
 }

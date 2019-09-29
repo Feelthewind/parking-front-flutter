@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:parking_flutter/shared/const.dart';
+import 'package:parking_flutter/shared/constants.dart';
 
 class AuthService {
   String token;
@@ -22,10 +22,8 @@ class AuthService {
         },
       );
       final responseData = jsonDecode(response.body);
-      print(responseData);
       token = responseData['accessToken'];
-      print('token');
-      print(token);
+      print(responseData);
       return responseData;
     } catch (e) {
       print(e);
@@ -33,7 +31,7 @@ class AuthService {
     }
   }
 
-  saveSocialUser(String provider, String id) async {
+  socialLogin(String provider, String id) async {
     final url = 'http://$BASE_URL/auth/social-login';
 
     try {

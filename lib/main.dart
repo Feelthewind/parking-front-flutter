@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/pages/create_parking.dart';
@@ -15,7 +14,7 @@ import 'package:provider/provider.dart';
 void main() {
   setupLocator();
   runApp(MyApp());
-  debugPaintSizeEnabled = true;
+  // debugPaintSizeEnabled = true;
 }
 
 class MyApp extends StatelessWidget {
@@ -34,13 +33,13 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Google Maps Demo',
             debugShowCheckedModeBanner: false,
-            home: auth.token != null ? OrderDetailPage() : SigninPage(),
-            // home: OrderDetailPage(),
+            home: auth.token != null ? MapPage() : SigninPage(),
             routes: {
               SigninPage.routeName: (_) => SigninPage(),
               MapPage.routeName: (_) => MapPage(),
               CreateParkingPage.routeName: (_) => CreateParkingPage(),
               OrderParkingPage.routeName: (_) => OrderParkingPage(),
+              OrderDetailPage.routeName: (_) => OrderDetailPage(),
             },
           );
         },

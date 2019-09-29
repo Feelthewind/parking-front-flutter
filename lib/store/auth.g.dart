@@ -26,6 +26,40 @@ mixin _$AuthStore on _AuthStore, Store {
     }, _$tokenAtom, name: '${_$tokenAtom.name}_set');
   }
 
+  final _$inUseAtom = Atom(name: '_AuthStore.inUse');
+
+  @override
+  bool get inUse {
+    _$inUseAtom.context.enforceReadPolicy(_$inUseAtom);
+    _$inUseAtom.reportObserved();
+    return super.inUse;
+  }
+
+  @override
+  set inUse(bool value) {
+    _$inUseAtom.context.conditionallyRunInAction(() {
+      super.inUse = value;
+      _$inUseAtom.reportChanged();
+    }, _$inUseAtom, name: '${_$inUseAtom.name}_set');
+  }
+
+  final _$isSharingAtom = Atom(name: '_AuthStore.isSharing');
+
+  @override
+  bool get isSharing {
+    _$isSharingAtom.context.enforceReadPolicy(_$isSharingAtom);
+    _$isSharingAtom.reportObserved();
+    return super.isSharing;
+  }
+
+  @override
+  set isSharing(bool value) {
+    _$isSharingAtom.context.conditionallyRunInAction(() {
+      super.isSharing = value;
+      _$isSharingAtom.reportChanged();
+    }, _$isSharingAtom, name: '${_$isSharingAtom.name}_set');
+  }
+
   final _$loginAsyncAction = AsyncAction('login');
 
   @override
@@ -33,11 +67,10 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$loginAsyncAction.run(() => super.login(email, password));
   }
 
-  final _$saveSocialUserAsyncAction = AsyncAction('saveSocialUser');
+  final _$socialLoginAsyncAction = AsyncAction('socialLogin');
 
   @override
-  Future<dynamic> saveSocialUser(String provider, String id) {
-    return _$saveSocialUserAsyncAction
-        .run(() => super.saveSocialUser(provider, id));
+  Future<dynamic> socialLogin(String provider, String id) {
+    return _$socialLoginAsyncAction.run(() => super.socialLogin(provider, id));
   }
 }
