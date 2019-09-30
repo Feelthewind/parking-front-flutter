@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:parking_flutter/locator.dart';
+import 'package:parking_flutter/models/order.dart';
 import 'package:parking_flutter/services/parking.dart';
 import 'package:parking_flutter/shared/constants.dart';
+import 'package:parking_flutter/store/auth.dart';
 import 'package:parking_flutter/store/orders.dart';
 import 'package:parking_flutter/widgets/extend_time_dialog.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +21,38 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
     final ordersStore = Provider.of<OrdersStore>(context, listen: false);
+    final parkingService = locator<ParkingService>();
+
+    _extendOrderTime(val) {
+      if (val != false) {
+        print('시간 연장');
+        print(val);
+        OrdersStore ordersStore =
+            Provider.of<OrdersStore>(context, listen: false);
+        ordersStore.extendOrderTime(val);
+      }
+    }
+
+    _cancelOrder() async {
+      OrdersStore ordersStore =
+          Provider.of<OrdersStore>(context, listen: false);
+      AuthStore authStore = Provider.of<AuthStore>(context, listen: false);
+      await ordersStore.cancelOrder();
+      await authStore.getMe();
+      Navigator.pop(context);
+    }
+
+    _showExtendTimeDialog(OrderEntity currentOrder) async {
+      final time =
+          await parkingService.getTimeToExtend(currentOrder.parking.id);
+      print(time);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return ExtendTimeDialog(int.parse(time));
+        },
+      ).then(_extendOrderTime);
+    }
 
     return Scaffold(
       appBar: AppBar(),
@@ -29,24 +63,20 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ? Center(child: CircularProgressIndicator())
             : Observer(
                 builder: (ctx) {
-                  final order = Provider.of<OrdersStore>(context, listen: false)
-                      .currentOrder;
-
-                  print(order);
-                  print(order.id);
-
-                  if (order == null) {
+                  final currentOrder =
+                      Provider.of<OrdersStore>(context, listen: false)
+                          .currentOrder;
+                  if (currentOrder == null) {
                     return Center(
                       child: Text('No order?'),
                     );
                   }
 
-                  ParkingService parkingService = locator<ParkingService>();
-
-                  final datetimeFrom = DateTime.parse(order.from).toLocal();
+                  final datetimeFrom =
+                      DateTime.parse(currentOrder.from).toLocal();
                   final timeFrom = datetimeFrom.toString().split(' ');
 
-                  final datetimeTo = DateTime.parse(order.to).toLocal();
+                  final datetimeTo = DateTime.parse(currentOrder.to).toLocal();
                   final timeTo = datetimeTo.toString().split(' ');
 
                   return Column(
@@ -139,31 +169,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                           '주차연장',
                                           style: TextStyle(fontSize: 16),
                                         ),
-                                        onPressed: () async {
-                                          final time = await parkingService
-                                              .getTimeToExtend(
-                                                  order.parking.id);
-                                          print(time);
-                                          // TODO: make time slots with this
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return ExtendTimeDialog(
-                                                  int.parse(time));
-                                            },
-                                          ).then((val) {
-                                            if (val != false) {
-                                              // TODO: 시간 연장!
-                                              print('연장');
-                                              print(val);
-                                              OrdersStore ordersStore =
-                                                  Provider.of<OrdersStore>(
-                                                      context,
-                                                      listen: false);
-                                              ordersStore.extendOrderTime(val);
-                                            }
-                                          });
-                                        },
+                                        onPressed: () =>
+                                            _showExtendTimeDialog(currentOrder),
                                       )
                                     : Container(),
                               ),
@@ -212,7 +219,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   child: SizedBox(
                                     width: double.infinity,
                                     child: Text(
-                                      order.parking.description,
+                                      currentOrder.parking.description,
                                       style: TextStyle(fontSize: 16),
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
@@ -241,7 +248,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                         width: deviceWidth / 2.7,
                                         child: FadeInImage.assetNetwork(
                                           image:
-                                              'http://$BASE_URL${order.parking.images[0]}',
+                                              'http://$BASE_URL${currentOrder.parking.images[0]}',
                                           placeholder: 'assets/placeholder.jpg',
                                           fit: BoxFit.cover,
                                         ),
@@ -274,14 +281,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                     ),
                                   ],
                                 ),
-                                onPressed: () async {
-                                  OrdersStore ordersStore =
-                                      Provider.of<OrdersStore>(context,
-                                          listen: false);
-                                  await ordersStore.cancelOrder();
-                                  await ordersStore.getLatestOrder();
-                                  Navigator.pop(context);
-                                },
+                                onPressed: _cancelOrder,
                               ),
                             ),
                             Expanded(

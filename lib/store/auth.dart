@@ -1,3 +1,4 @@
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobx/mobx.dart';
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/services/auth.dart';
@@ -19,6 +20,19 @@ abstract class _AuthStore with Store {
   bool isSharing = false;
 
   @action
+  Future<void> getMe() async {
+    try {
+      final result = await authService.getMe();
+      print(result);
+      inUse = result['inUse'];
+      isSharing = result['isSharing'];
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  @action
   Future<dynamic> login(String email, String password) async {
     try {
       final result = await authService.authenticate(email, password);
@@ -33,9 +47,12 @@ abstract class _AuthStore with Store {
   }
 
   @action
-  Future<dynamic> socialLogin(String provider, String id) async {
+  Future<dynamic> socialLogin(
+    String provider,
+    GoogleSignInAccount googleUser,
+  ) async {
     try {
-      final result = await authService.socialLogin(provider, id);
+      final result = await authService.socialLogin(provider, googleUser);
       token = result['accessToken'];
       inUse = result['inUse'];
       isSharing = result['isSharing'];
@@ -45,15 +62,4 @@ abstract class _AuthStore with Store {
       throw e;
     }
   }
-
-  // @action
-  // Future<dynamic> socialLogin(String provider) async {
-  //   try {
-  //     final result = await authService.googleLogin();
-  //     token = result['accessToken'];
-  //   } catch (e) {
-  //     print('4');
-  //     throw e;
-  //   }
-  // }
 }

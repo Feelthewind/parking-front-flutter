@@ -302,10 +302,12 @@ class _SigninPageState extends State<SigninPage> {
     try {
       GoogleSignInAccount googleUser = await _googleSignIn.signIn();
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      print(googleAuth.accessToken);
-      print(googleAuth.idToken);
+      print('===================');
+      print('idtoken for google');
+      print(googleUser.id);
+      print(googleUser.email);
       AuthStore authStore = Provider.of<AuthStore>(context, listen: false);
-      authStore.socialLogin('google', googleAuth.idToken);
+      authStore.socialLogin('google', googleUser);
     } catch (error) {
       print(error);
     }

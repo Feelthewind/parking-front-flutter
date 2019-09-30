@@ -14,43 +14,28 @@ class ParkingService {
   AuthService authService = locator<AuthService>();
   Dio dio = Dio();
 
-  Future<void> createParking(
+  Future<dynamic> createParking(
     Map<String, dynamic> parking,
-    // String price,
-    // String description,
-    // List<double> coordinates,
-    // List<String> images,
-    // List<Map<String, dynamic>> timezones,
   ) async {
     try {
       var uri = Uri.http(BASE_URL, '/parking');
-      var response = await http.post(uri,
-          headers: <String, String>{
-            HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
-            HttpHeaders.contentTypeHeader: 'application/json',
-            'Accept': 'application/json',
-          },
-          body: jsonEncode(parking));
-
-      print(response.body);
-      return;
-
-      // final jsonResponse = jsonDecode(response.body);
-      // final ParkingList parkingList = ParkingList.fromJson(jsonResponse);
-
-      // print('=========================');
-      // print('=========================');
-      // print(parkingList);
-      // print(parkingList.parkings);
-
-      // return parkingList.parkings;
+      var response = await http.post(
+        uri,
+        headers: <String, String>{
+          HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.acceptHeader: 'application/json',
+        },
+        body: jsonEncode(parking),
+      );
+      return jsonDecode(response.body);
     } catch (e) {
       print(e);
       throw e;
     }
   }
 
-  Future<String> saveParkingImages(File image) async {
+  Future<String> saveParkingImage(File image) async {
     // try {
     //   List uploadList = [];
     //   for (var imageFile in images) {
@@ -69,12 +54,10 @@ class ParkingService {
     // }
     try {
       FormData formData = FormData();
-
       formData.add("files", new UploadFileInfo(image, basename(image.path)));
 
       final response =
           await dio.post('http://$BASE_URL/parking/images', data: formData);
-
       print(response);
       return response.data['url'];
     } catch (e) {
@@ -103,24 +86,16 @@ class ParkingService {
       Map<String, String> queryParameters) async {
     try {
       var uri = Uri.http(BASE_URL, '/parking/bounds', queryParameters);
-      print('token');
-      print(authService.token);
       var response = await http.get(uri, headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
         HttpHeaders.contentTypeHeader: 'application/json',
-        'Accept': 'application/json',
+        HttpHeaders.acceptHeader: 'application/json',
       });
-
       print(response.body);
-
       final jsonResponse = jsonDecode(response.body);
       final ParkingList parkingList = ParkingList.fromJson(jsonResponse);
 
       print('=========================');
-      print('=========================');
-      print(parkingList);
       print(parkingList.parkings);
-
       return parkingList.parkings;
     } catch (e) {
       print(e);
@@ -130,23 +105,18 @@ class ParkingService {
 
   Future<List<Cluster>> getParkingsByClustering(
       Map<String, String> queryParameters) async {
-    authService = locator<AuthService>();
-
     try {
       var uri = Uri.http(BASE_URL, '/parking/clustering', queryParameters);
       var response = await http.get(uri, headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
         HttpHeaders.contentTypeHeader: 'application/json',
-        'Accept': 'application/json',
+        HttpHeaders.acceptHeader: 'application/json',
       });
 
       print(response.body);
-
-      final dynamic jsonResponse = jsonDecode(response.body);
+      final jsonResponse = jsonDecode(response.body);
       final ClusterList clusterList = ClusterList.fromJson(jsonResponse);
       return clusterList.clusters;
     } catch (e) {
-      print('error clustering');
       print(e);
       throw e;
     }
@@ -160,11 +130,9 @@ class ParkingService {
       var response = await http.get(uri, headers: <String, String>{
         HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
         HttpHeaders.contentTypeHeader: 'application/json',
-        'Accept': 'application/json',
+        HttpHeaders.acceptHeader: 'application/json',
       });
-
       print(response.body);
-
       return response.body;
     } catch (e) {
       print(e);

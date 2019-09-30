@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/services/parking.dart';
+import 'package:parking_flutter/store/auth.dart';
+import 'package:provider/provider.dart';
 
 class CreateParkingPage extends StatefulWidget {
   static const routeName = '/create-parking';
@@ -15,7 +17,8 @@ class CreateParkingPage extends StatefulWidget {
 class _CreateParkingPageState extends State<CreateParkingPage> {
   Map<int, File> _images = {};
   final GlobalKey<FormState> _formKey = GlobalKey();
-  Map<String, dynamic> _parkingData = {
+  // Static data only for testing
+  final Map<String, dynamic> _parkingData = {
     "price": "",
     "description": "",
     "lat": 37.608267,
@@ -41,28 +44,84 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
     _formKey.currentState.save();
 
     final urls = await _saveImages();
-    print('urls');
-    print(urls);
     if (urls == null) {
       return;
     }
 
     ParkingService parkingService = locator<ParkingService>();
+    AuthStore authStore = Provider.of<AuthStore>(context, listen: false);
     try {
       // {statusCode: 401, error: Unauthorized, message: Invalid credentials}
       _parkingData["images"] = urls;
-      await parkingService.createParking(_parkingData);
-      Navigator.pop(context);
+      final result = await parkingService.createParking(_parkingData);
+      var message = '';
+      if ((result['statusCode'] >= 400) && (result['statusCode'] < 500)) {
+        print(result);
+        print(result['message'].runtimeType);
+        if (result['message'] is List) {
+          message = 'Error from server...';
+        } else {
+          message = result['message'];
+        }
+
+        // TODO: delete images if createParking fails
+      } else {
+        message = '500 Error';
+      }
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('에러!'),
+          content: Container(
+            width: double.maxFinite,
+            height: 200,
+            child: Text(message),
+          ),
+          actions: <Widget>[
+            SizedBox(
+              width: 80,
+              child: RaisedButton(
+                child: Text(
+                  '확인',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  // await authStore.getMe();
+                  // Navigator.pushReplacementNamed(context, MapPage.routeName);
+                },
+              ),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       print(e);
     }
   }
 
+  Future<dynamic> _saveImages() async {
+    try {
+      ParkingService parkingService = locator<ParkingService>();
+      // Make sure not to send null images
+      _images.removeWhere((order, file) {
+        if (file == null) return true;
+        return false;
+      });
+      List<Future<String>> result = [];
+      for (var i = 0; i < _images.length; i++) {
+        result.add(parkingService.saveParkingImage(_images[i]));
+      }
+      return Future.wait(result); // Just like Promise.all()
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
   handleImagePicked(int order, File image, [String error]) {
     print('handleimagepicked');
-    print('called');
     Map<int, File> newImages = {};
-
     newImages.addAll(_images);
     newImages[order] = image;
 
@@ -71,25 +130,7 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
     });
 
     if (error != null) {
-      // TODO: alert file limit
-    }
-  }
-
-  Future<dynamic> _saveImages() async {
-    try {
-      ParkingService parkingService = locator<ParkingService>();
-      _images.removeWhere((order, file) {
-        if (file == null) return true;
-        return false;
-      });
-      List<Future<String>> result = [];
-      for (var i = 0; i < _images.length; i++) {
-        result.add(parkingService.saveParkingImages(_images[i]));
-      }
-      return Future.wait(result);
-    } catch (e) {
-      print(e);
-      return null;
+      // TODO: alert file limit error
     }
   }
 
@@ -115,6 +156,7 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
           ),
         ],
       ),
+      // LayoutBuilder just to handle keyboard blocking screen (+SingleChildScrollView...)
       body: LayoutBuilder(
         builder: (context, constraint) {
           return SingleChildScrollView(
@@ -171,11 +213,6 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
                                             ),
                                           ),
                                         ),
-                                        // TextField(
-                                        //   decoration: InputDecoration(
-                                        //     hintText: '830717',
-                                        //   ),
-                                        // ),
                                       ],
                                     ),
                                     SizedBox(height: 12),
@@ -403,12 +440,11 @@ class ImagePickerBox extends StatelessWidget {
 
   Future<void> getImage(int order) async {
     try {
-      var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-      print(image);
-      print(order);
-
+      final image = await ImagePicker.pickImage(source: ImageSource.gallery);
       final fileSize = await image.length();
 
+      print(image);
+      print(order);
       print(fileSize);
 
       if (fileSize > 5 * 1024 * 1024) {

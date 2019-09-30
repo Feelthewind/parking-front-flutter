@@ -60,6 +60,13 @@ mixin _$AuthStore on _AuthStore, Store {
     }, _$isSharingAtom, name: '${_$isSharingAtom.name}_set');
   }
 
+  final _$getMeAsyncAction = AsyncAction('getMe');
+
+  @override
+  Future<void> getMe() {
+    return _$getMeAsyncAction.run(() => super.getMe());
+  }
+
   final _$loginAsyncAction = AsyncAction('login');
 
   @override
@@ -70,7 +77,8 @@ mixin _$AuthStore on _AuthStore, Store {
   final _$socialLoginAsyncAction = AsyncAction('socialLogin');
 
   @override
-  Future<dynamic> socialLogin(String provider, String id) {
-    return _$socialLoginAsyncAction.run(() => super.socialLogin(provider, id));
+  Future<dynamic> socialLogin(String provider, GoogleSignInAccount googleUser) {
+    return _$socialLoginAsyncAction
+        .run(() => super.socialLogin(provider, googleUser));
   }
 }

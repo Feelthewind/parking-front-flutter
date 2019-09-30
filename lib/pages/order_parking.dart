@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:parking_flutter/locator.dart';
-import 'package:parking_flutter/services/auth.dart';
 import 'package:parking_flutter/services/order.dart';
 import 'package:parking_flutter/shared/colors.dart';
+import 'package:parking_flutter/store/auth.dart';
 import 'package:parking_flutter/store/orders.dart';
 import 'package:parking_flutter/store/parking.dart';
 import 'package:parking_flutter/widgets/time_dialog.dart';
@@ -16,18 +16,7 @@ class OrderParkingPage extends StatefulWidget {
 
 class _OrderParkingPageState extends State<OrderParkingPage> {
   ParkingStore parking;
-  int minutes = 30;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(OrderParkingPage oldWidget) {
-    // TODO: implement didUpdateWidget
-    super.didUpdateWidget(oldWidget);
-  }
+  int minutes = 30; // TODO: Receive actual minutes info from map page
 
   _showTimeDialog() {
     showDialog(
@@ -46,8 +35,11 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
 
   _createOrder() async {
     OrderService orderService = locator<OrderService>();
-    AuthService authService = locator<AuthService>();
     OrdersStore ordersStore = Provider.of<OrdersStore>(context, listen: false);
+    AuthStore authStore = Provider.of<AuthStore>(context, listen: false);
+
+    // TODO: Check error when provider make order for his parking
+    // TODO: Move orderPakring to path through ordersStore
     await orderService.orderParking({
       "parkingId": parking.id,
       "from": parking.timezones[0].from,
@@ -55,13 +47,19 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
       "minutes": minutes,
       "cardNumber": "00모0000",
     });
-    await ordersStore.getLatestOrder();
+
+    await authStore.getMe();
+
+    Navigator.pop(context);
+
+    // TODO: Error
+    // await ordersStore.getLatestOrder();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('rebuild');
     parking = ModalRoute.of(context).settings.arguments as ParkingStore;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('광진 공유주차장 #990916'),

@@ -25,10 +25,15 @@ abstract class _OrdersStore with Store {
   Future<void> getLatestOrder() async {
     try {
       currentOrder = await orderService.getLatestOrder();
-      timeToExtend =
-          await parkingService.getTimeToExtend(currentOrder.parking.id);
-      print('timetoextend in ordet store');
-      print(timeToExtend);
+      print('currentOrder');
+      print('getLatestOrder');
+      print(currentOrder);
+      if (currentOrder != null) {
+        timeToExtend =
+            await parkingService.getTimeToExtend(currentOrder.parking.id);
+        print('timetoextend in order store');
+        print(timeToExtend);
+      }
     } catch (e) {
       print(e);
       throw e;

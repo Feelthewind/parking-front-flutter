@@ -5,7 +5,7 @@ import 'package:parking_flutter/store/parking.dart';
 
 class ParkingBottomModal extends StatelessWidget {
   final ParkingStore parking;
-  final int count;
+  final int count; // to reflect time slot values
 
   ParkingBottomModal(this.parking, [this.count = 1]);
 

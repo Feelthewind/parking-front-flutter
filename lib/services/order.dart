@@ -32,11 +32,15 @@ class OrderService {
         headers: <String, String>{
           HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
           HttpHeaders.contentTypeHeader: 'application/json',
-          'Accept': 'application/json',
+          HttpHeaders.acceptHeader: 'application/json',
         },
       );
-
+      print('response body');
       print(response.body);
+      if (response.body.isEmpty) {
+        print('response body');
+        return null;
+      }
       return OrderEntity.fromJson(jsonDecode(response.body));
     } catch (e) {
       print(e);
