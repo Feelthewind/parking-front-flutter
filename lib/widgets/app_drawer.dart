@@ -19,7 +19,7 @@ class AppDrawer extends StatelessWidget {
               ),
               Container(
                 color: Colors.blueGrey,
-                child: authStore.inUse
+                child: authStore.user.inUse
                     ? ListTile(
                         leading: Icon(
                           Icons.data_usage,
@@ -42,7 +42,7 @@ class AppDrawer extends StatelessWidget {
               ),
               Container(
                 color: Colors.blueGrey,
-                child: authStore.isSharing
+                child: authStore.user.isSharing
                     ? ListTile(
                         leading: Icon(
                           Icons.data_usage,

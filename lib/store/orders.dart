@@ -1,5 +1,6 @@
 import 'package:mobx/mobx.dart';
 import 'package:parking_flutter/locator.dart';
+import 'package:parking_flutter/models/error_response.dart';
 import 'package:parking_flutter/models/order.dart';
 import 'package:parking_flutter/services/order.dart';
 import 'package:parking_flutter/services/parking.dart';
@@ -13,26 +14,31 @@ abstract class _OrdersStore with Store {
   final parkingService = locator<ParkingService>();
 
   @observable
-  ObservableList<OrderEntity> orders = ObservableList<OrderEntity>();
+  ObservableList<Order> orders = ObservableList<Order>();
 
   @observable
-  OrderEntity currentOrder;
+  Order currentOrder;
 
   @observable
   String timeToExtend;
 
+  @observable
+  ErrorResponse error;
+
   @action
   Future<void> getLatestOrder() async {
     try {
-      currentOrder = await orderService.getLatestOrder();
-      print('currentOrder');
+      final result = await orderService.getLatestOrder();
+      print('result');
       print('getLatestOrder');
-      print(currentOrder);
-      if (currentOrder != null) {
-        timeToExtend =
-            await parkingService.getTimeToExtend(currentOrder.parking.id);
+      print(result);
+      if (result is Order) {
+        currentOrder = result;
+        timeToExtend = await parkingService.getTimeToExtend(result.parking.id);
         print('timetoextend in order store');
         print(timeToExtend);
+      } else if (result is ErrorResponse) {
+        error = result;
       }
     } catch (e) {
       print(e);

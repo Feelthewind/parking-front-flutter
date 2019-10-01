@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:parking_flutter/models/error_response.dart';
 import 'package:parking_flutter/shared/colors.dart';
 import 'package:parking_flutter/store/auth.dart';
 import 'package:provider/provider.dart';
@@ -328,8 +329,8 @@ class _SigninPageState extends State<SigninPage> {
       // {statusCode: 401, error: Unauthorized, message: Invalid credentials}
       final result =
           await authStore.login(_authData['email'], _authData['password']);
-      if (result['error'] != null) {
-        _showErrorDialog(result['message']);
+      if (result is ErrorResponse) {
+        _showErrorDialog(result.message);
       }
     } catch (e) {
       var errorMessage = 'Could not authenticate you. Please try again later.';

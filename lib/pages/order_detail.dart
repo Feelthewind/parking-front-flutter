@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:parking_flutter/locator.dart';
 import 'package:parking_flutter/models/order.dart';
+import 'package:parking_flutter/pages/map.dart';
 import 'package:parking_flutter/services/parking.dart';
 import 'package:parking_flutter/shared/constants.dart';
 import 'package:parking_flutter/store/auth.dart';
@@ -39,10 +40,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       AuthStore authStore = Provider.of<AuthStore>(context, listen: false);
       await ordersStore.cancelOrder();
       await authStore.getMe();
-      Navigator.pop(context);
+      Navigator.pushReplacementNamed(context, MapPage.routeName);
     }
 
-    _showExtendTimeDialog(OrderEntity currentOrder) async {
+    _showExtendTimeDialog(Order currentOrder) async {
       final time =
           await parkingService.getTimeToExtend(currentOrder.parking.id);
       print(time);
@@ -68,7 +69,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           .currentOrder;
                   if (currentOrder == null) {
                     return Center(
-                      child: Text('No order?'),
+                      child: CircularProgressIndicator(),
                     );
                   }
 
@@ -230,32 +231,35 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                               ),
                               Expanded(
                                 flex: 3,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                            color: Colors.grey[300])),
-                                  ),
-                                  padding: const EdgeInsets.only(
-                                      left: 16, bottom: 16),
-                                  child: ListView(
-                                    scrollDirection: Axis.horizontal,
-                                    children: <Widget>[
-                                      Container(
-                                        padding:
-                                            const EdgeInsets.only(right: 8),
-                                        height: double.infinity,
-                                        width: deviceWidth / 2.7,
-                                        child: FadeInImage.assetNetwork(
-                                          image:
-                                              'http://$BASE_URL${currentOrder.parking.images[0]}',
-                                          placeholder: 'assets/placeholder.jpg',
-                                          fit: BoxFit.cover,
+                                child: currentOrder.parking.images.isNotEmpty
+                                    ? Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                              bottom: BorderSide(
+                                                  color: Colors.grey[300])),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                        padding: const EdgeInsets.only(
+                                            left: 16, bottom: 16),
+                                        child: ListView(
+                                          scrollDirection: Axis.horizontal,
+                                          children: <Widget>[
+                                            Container(
+                                              padding: const EdgeInsets.only(
+                                                  right: 8),
+                                              height: double.infinity,
+                                              width: deviceWidth / 2.7,
+                                              child: FadeInImage.assetNetwork(
+                                                image:
+                                                    'http://$BASE_URL${currentOrder.parking.images[0]}',
+                                                placeholder:
+                                                    'assets/placeholder.jpg',
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : Text('No images'),
                               ),
                             ],
                           ),

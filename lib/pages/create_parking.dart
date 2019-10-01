@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:parking_flutter/locator.dart';
+import 'package:parking_flutter/models/error_response.dart';
 import 'package:parking_flutter/services/parking.dart';
+import 'package:parking_flutter/shared/error_dialog.dart';
 import 'package:parking_flutter/store/auth.dart';
 import 'package:provider/provider.dart';
 
@@ -54,47 +56,14 @@ class _CreateParkingPageState extends State<CreateParkingPage> {
       // {statusCode: 401, error: Unauthorized, message: Invalid credentials}
       _parkingData["images"] = urls;
       final result = await parkingService.createParking(_parkingData);
-      var message = '';
-      if ((result['statusCode'] >= 400) && (result['statusCode'] < 500)) {
-        print(result);
-        print(result['message'].runtimeType);
-        if (result['message'] is List) {
-          message = 'Error from server...';
-        } else {
-          message = result['message'];
-        }
-
+      if (result is ErrorResponse) {
         // TODO: delete images if createParking fails
+        var message = result.message ?? 'error for some reason';
+        showErrorDialog(context, message);
       } else {
-        message = '500 Error';
+        await authStore.getMe();
+        Navigator.pop(context);
       }
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text('에러!'),
-          content: Container(
-            width: double.maxFinite,
-            height: 200,
-            child: Text(message),
-          ),
-          actions: <Widget>[
-            SizedBox(
-              width: 80,
-              child: RaisedButton(
-                child: Text(
-                  '확인',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  // await authStore.getMe();
-                  // Navigator.pushReplacementNamed(context, MapPage.routeName);
-                },
-              ),
-            ),
-          ],
-        ),
-      );
     } catch (e) {
       print(e);
     }

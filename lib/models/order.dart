@@ -1,27 +1,27 @@
-import 'package:parking_flutter/models/parking.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:parking_flutter/models/parkings.dart';
+import 'package:parking_flutter/models/user.dart';
 
-class OrderEntity {
+part 'order.g.dart';
+
+@JsonSerializable(nullable: true)
+class Order {
   final int id;
   final String from;
   final String to;
-  final String orderState;
+  final String state;
   final Parking parking;
+  final User buyer;
 
-  OrderEntity({
+  Order({
     this.id,
     this.from,
     this.to,
-    this.orderState,
+    this.state,
     this.parking,
+    this.buyer,
   });
 
-  factory OrderEntity.fromJson(Map<String, dynamic> json) {
-    return OrderEntity(
-      id: json['id'],
-      from: json['from'],
-      to: json['to'],
-      orderState: json['state'],
-      parking: Parking.fromJson(json['parking']),
-    );
-  }
+  factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
+  Map<String, dynamic> toJson() => _$OrderToJson(this);
 }

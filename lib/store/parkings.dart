@@ -1,6 +1,6 @@
 import 'package:mobx/mobx.dart';
 import 'package:parking_flutter/locator.dart';
-import 'package:parking_flutter/models/cluster.dart';
+import 'package:parking_flutter/models/clusters.dart';
 import 'package:parking_flutter/services/parking.dart';
 import 'package:parking_flutter/store/parking.dart';
 
@@ -29,7 +29,7 @@ abstract class _ParkingsStore with Store {
           coordinates: parking.coordinates,
           isAvailable: parking.isAvailable,
           price: parking.price,
-          timezones: parking.timezones.timezones,
+          timezones: parking.timezones,
         );
       });
       parkings = ObservableList.of(parkingsResult);

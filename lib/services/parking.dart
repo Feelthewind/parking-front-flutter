@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:parking_flutter/locator.dart';
-import 'package:parking_flutter/models/cluster.dart';
-import 'package:parking_flutter/models/parking.dart';
+import 'package:parking_flutter/models/clusters.dart';
+import 'package:parking_flutter/models/error_response.dart';
+import 'package:parking_flutter/models/parkings.dart';
 import 'package:parking_flutter/services/auth.dart';
 import 'package:parking_flutter/shared/constants.dart';
 import 'package:path/path.dart';
@@ -18,20 +19,30 @@ class ParkingService {
     Map<String, dynamic> parking,
   ) async {
     try {
-      var uri = Uri.http(BASE_URL, '/parking');
-      var response = await http.post(
-        uri,
-        headers: <String, String>{
+      return await dio.post(
+        'http://$BASE_URL/parking',
+        data: parking,
+        options: Options(headers: {
           HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
           HttpHeaders.contentTypeHeader: 'application/json',
           HttpHeaders.acceptHeader: 'application/json',
-        },
-        body: jsonEncode(parking),
+        }),
       );
-      return jsonDecode(response.body);
-    } catch (e) {
-      print(e);
-      throw e;
+    } on DioError catch (e) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx and is also not 304.
+      if (e.response != null) {
+        print(e.response.data);
+        print(e.response.headers);
+        print(e.response.request);
+        return ErrorResponse.fromJson(
+          e.response.data,
+        ); // TODO: fix => error when message is not string
+      } else {
+        // Something happened in setting up or sending the request that triggered an Error
+        print(e.request);
+        print(e.message);
+      }
     }
   }
 

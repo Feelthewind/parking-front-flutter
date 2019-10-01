@@ -120,7 +120,7 @@ class ParkingBottomModal extends StatelessWidget {
                   style: TextStyle(color: Colors.white70),
                 ),
                 onPressed: () {
-                  Navigator.of(context).pushNamed(
+                  Navigator.of(context).popAndPushNamed(
                     OrderParkingPage.routeName,
                     arguments: parking,
                   );

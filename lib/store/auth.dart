@@ -1,6 +1,8 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobx/mobx.dart';
 import 'package:parking_flutter/locator.dart';
+import 'package:parking_flutter/models/error_response.dart';
+import 'package:parking_flutter/models/user.dart';
 import 'package:parking_flutter/services/auth.dart';
 
 part 'auth.g.dart';
@@ -11,21 +13,23 @@ abstract class _AuthStore with Store {
   AuthService authService = locator<AuthService>();
 
   @observable
+  User user;
+
+  @observable
   String token;
 
   @observable
-  bool inUse = false;
-
-  @observable
-  bool isSharing = false;
+  ErrorResponse error;
 
   @action
   Future<void> getMe() async {
     try {
       final result = await authService.getMe();
-      print(result);
-      inUse = result['inUse'];
-      isSharing = result['isSharing'];
+      if (result is User) {
+        user = result;
+      } else if (result is ErrorResponse) {
+        error = result;
+      }
     } catch (e) {
       print(e);
       throw e;
@@ -36,9 +40,12 @@ abstract class _AuthStore with Store {
   Future<dynamic> login(String email, String password) async {
     try {
       final result = await authService.authenticate(email, password);
-      token = result['accessToken'];
-      inUse = result['inUse'];
-      isSharing = result['isSharing'];
+      if (result is ErrorResponse) {
+        error = result;
+      } else {
+        user = result;
+        token = result.accessToken;
+      }
       return result;
     } catch (e) {
       print(e);
@@ -53,9 +60,12 @@ abstract class _AuthStore with Store {
   ) async {
     try {
       final result = await authService.socialLogin(provider, googleUser);
-      token = result['accessToken'];
-      inUse = result['inUse'];
-      isSharing = result['isSharing'];
+      if (result is ErrorResponse) {
+        error = result;
+      } else {
+        user = result;
+        token = result.accessToken;
+      }
       return result;
     } catch (e) {
       print('3');

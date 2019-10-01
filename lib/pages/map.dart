@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong/latlong.dart' as LatLngPlugin;
 import 'package:location/location.dart';
-import 'package:parking_flutter/models/cluster.dart';
+import 'package:parking_flutter/models/clusters.dart';
 import 'package:parking_flutter/pages/create_parking.dart';
 import 'package:parking_flutter/store/parking.dart';
 import 'package:parking_flutter/store/parkings.dart';

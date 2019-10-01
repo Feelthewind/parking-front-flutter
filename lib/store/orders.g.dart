@@ -12,14 +12,14 @@ mixin _$OrdersStore on _OrdersStore, Store {
   final _$ordersAtom = Atom(name: '_OrdersStore.orders');
 
   @override
-  ObservableList<OrderEntity> get orders {
+  ObservableList<Order> get orders {
     _$ordersAtom.context.enforceReadPolicy(_$ordersAtom);
     _$ordersAtom.reportObserved();
     return super.orders;
   }
 
   @override
-  set orders(ObservableList<OrderEntity> value) {
+  set orders(ObservableList<Order> value) {
     _$ordersAtom.context.conditionallyRunInAction(() {
       super.orders = value;
       _$ordersAtom.reportChanged();
@@ -29,14 +29,14 @@ mixin _$OrdersStore on _OrdersStore, Store {
   final _$currentOrderAtom = Atom(name: '_OrdersStore.currentOrder');
 
   @override
-  OrderEntity get currentOrder {
+  Order get currentOrder {
     _$currentOrderAtom.context.enforceReadPolicy(_$currentOrderAtom);
     _$currentOrderAtom.reportObserved();
     return super.currentOrder;
   }
 
   @override
-  set currentOrder(OrderEntity value) {
+  set currentOrder(Order value) {
     _$currentOrderAtom.context.conditionallyRunInAction(() {
       super.currentOrder = value;
       _$currentOrderAtom.reportChanged();

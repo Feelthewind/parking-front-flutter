@@ -1,5 +1,5 @@
 import 'package:mobx/mobx.dart';
-import 'package:parking_flutter/models/parking.dart';
+import 'package:parking_flutter/models/parkings.dart';
 
 part 'parking.g.dart';
 

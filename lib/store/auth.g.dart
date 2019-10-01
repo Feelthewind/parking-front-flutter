@@ -9,6 +9,23 @@ part of 'auth.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$AuthStore on _AuthStore, Store {
+  final _$userAtom = Atom(name: '_AuthStore.user');
+
+  @override
+  User get user {
+    _$userAtom.context.enforceReadPolicy(_$userAtom);
+    _$userAtom.reportObserved();
+    return super.user;
+  }
+
+  @override
+  set user(User value) {
+    _$userAtom.context.conditionallyRunInAction(() {
+      super.user = value;
+      _$userAtom.reportChanged();
+    }, _$userAtom, name: '${_$userAtom.name}_set');
+  }
+
   final _$tokenAtom = Atom(name: '_AuthStore.token');
 
   @override
@@ -26,38 +43,21 @@ mixin _$AuthStore on _AuthStore, Store {
     }, _$tokenAtom, name: '${_$tokenAtom.name}_set');
   }
 
-  final _$inUseAtom = Atom(name: '_AuthStore.inUse');
+  final _$errorAtom = Atom(name: '_AuthStore.error');
 
   @override
-  bool get inUse {
-    _$inUseAtom.context.enforceReadPolicy(_$inUseAtom);
-    _$inUseAtom.reportObserved();
-    return super.inUse;
+  ErrorResponse get error {
+    _$errorAtom.context.enforceReadPolicy(_$errorAtom);
+    _$errorAtom.reportObserved();
+    return super.error;
   }
 
   @override
-  set inUse(bool value) {
-    _$inUseAtom.context.conditionallyRunInAction(() {
-      super.inUse = value;
-      _$inUseAtom.reportChanged();
-    }, _$inUseAtom, name: '${_$inUseAtom.name}_set');
-  }
-
-  final _$isSharingAtom = Atom(name: '_AuthStore.isSharing');
-
-  @override
-  bool get isSharing {
-    _$isSharingAtom.context.enforceReadPolicy(_$isSharingAtom);
-    _$isSharingAtom.reportObserved();
-    return super.isSharing;
-  }
-
-  @override
-  set isSharing(bool value) {
-    _$isSharingAtom.context.conditionallyRunInAction(() {
-      super.isSharing = value;
-      _$isSharingAtom.reportChanged();
-    }, _$isSharingAtom, name: '${_$isSharingAtom.name}_set');
+  set error(ErrorResponse value) {
+    _$errorAtom.context.conditionallyRunInAction(() {
+      super.error = value;
+      _$errorAtom.reportChanged();
+    }, _$errorAtom, name: '${_$errorAtom.name}_set');
   }
 
   final _$getMeAsyncAction = AsyncAction('getMe');
