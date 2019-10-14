@@ -26,6 +26,19 @@ abstract class _OrdersStore with Store {
   ErrorResponse error;
 
   @action
+  Future<void> createOrder(order) async {
+    try {
+      final result = await orderService.createOrder(order);
+      if (result is ErrorResponse) {
+        error = result;
+      }
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  @action
   Future<void> getLatestOrder() async {
     try {
       final result = await orderService.getLatestOrder();

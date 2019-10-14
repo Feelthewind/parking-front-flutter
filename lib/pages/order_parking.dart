@@ -40,7 +40,7 @@ class _OrderParkingPageState extends State<OrderParkingPage> {
 
     // TODO: Check error when provider make order for his parking
     // TODO: Move orderPakring to path through ordersStore
-    await orderService.orderParking({
+    await ordersStore.createOrder({
       "parkingId": parking.id,
       "from": parking.timezones[0].from,
       "to": parking.timezones[0].to,

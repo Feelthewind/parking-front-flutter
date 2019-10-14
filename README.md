@@ -1,3 +1,7 @@
+### 플러터로 모두의 주차장 서비스 일부를 구현했습니다.
+
+### 상태관리 플러그인으로 Provider, Mobx를 사용했습니다.
+
 # parking_flutter
 
 A new Flutter project.

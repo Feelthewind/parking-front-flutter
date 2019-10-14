@@ -13,18 +13,22 @@ class OrderService {
   AuthService authService = locator<AuthService>();
   Dio dio = Dio();
 
-  Future<void> orderParking(Map<String, dynamic> order) async {
-    var uri = Uri.http(BASE_URL, '/order');
-    var response = await http.post(uri,
-        headers: <String, String>{
+  Future<dynamic> createOrder(Map<String, dynamic> order) async {
+    try {
+      final response = await dio.post(
+        'http://$BASE_URL/order',
+        data: order,
+        options: Options(headers: {
           HttpHeaders.authorizationHeader: 'Bearer ${authService.token}',
           HttpHeaders.contentTypeHeader: 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(order));
-
-    print(response.body);
-    // return OrderEntity.fromJson(jsonDecode(response.body));
+          HttpHeaders.acceptHeader: 'application/json',
+        }),
+      );
+      print(response.data);
+    } on DioError catch (e) {
+      print(e);
+      return ErrorResponse.fromJson(e.response.data);
+    }
   }
 
   Future<dynamic> getLatestOrder() async {
@@ -40,17 +44,11 @@ class OrderService {
       print(response.data);
       return Order.fromJson(response.data);
     } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
       if (e.response != null) {
-        print(e.response.data);
-        print(e.response.headers);
-        print(e.response.request);
         return ErrorResponse.fromJson(
           e.response.data,
         );
       } else {
-        // Something happened in setting up or sending the request that triggered an Error
         print(e.request);
         print(e.message);
       }

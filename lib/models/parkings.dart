@@ -13,15 +13,6 @@ class ParkingList {
   factory ParkingList.fromJson(Map<String, dynamic> json) =>
       _$ParkingListFromJson(json);
   Map<String, dynamic> toJson() => _$ParkingListToJson(this);
-
-  // factory ParkingList.fromJson(List<dynamic> parsedJson) {
-  //   List<Parking> parkings = new List<Parking>();
-  //   parkings = parsedJson.map((dynamic i) => Parking.fromJson(i)).toList();
-
-  //   return new ParkingList(
-  //     parkings: parkings,
-  //   );
-  // }
 }
 
 @JsonSerializable(nullable: true)
@@ -47,22 +38,6 @@ class Parking {
   factory Parking.fromJson(Map<String, dynamic> json) =>
       _$ParkingFromJson(json);
   Map<String, dynamic> toJson() => _$ParkingToJson(this);
-
-  // factory Parking.fromJson(Map<String, dynamic> json) {
-  //   List<double> coordinates = new List<double>.from(json['coordinates']);
-  //   List<String> images = new List<String>.from(json['images']);
-  //   List<dynamic> timezonesJson = new List<dynamic>.from(json['timezones']);
-
-  //   return new Parking(
-  //     id: json['id'],
-  //     isAvailable: json['isAvailable'],
-  //     price: json['price'],
-  //     description: json['description'],
-  //     coordinates: coordinates,
-  //     images: images,
-  //     timezones: TimezoneList.fromJson(timezonesJson),
-  //   );
-  // }
 }
 
 @JsonSerializable(nullable: true)
@@ -80,12 +55,4 @@ class Timezone {
   factory Timezone.fromJson(Map<String, dynamic> json) =>
       _$TimezoneFromJson(json);
   Map<String, dynamic> toJson() => _$TimezoneToJson(this);
-
-  // factory Timezone.fromJson(Map<String, dynamic> json) {
-  //   return new Timezone(
-  //     day: json['day'],
-  //     from: json['from'],
-  //     to: json['to'],
-  //   );
-  // }
 }
