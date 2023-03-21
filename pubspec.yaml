@@ -21,17 +21,17 @@ dependencies:
     sdk: flutter
   google_maps_flutter: ^0.5.21+3
   location: ^2.3.5
-  http: ^0.12.0+1
+  http: ">=0.12.0+1 <0.14.0"
   intl: ^0.15.8
   latlong: ^0.6.1
-  mobx: ^0.3.8+1
-  flutter_mobx: ^0.3.3+1
+  mobx: ">=0.3.8+1 <2.0.0"
+  flutter_mobx: ">=0.3.3+1 <2.0.0"
   provider: ^3.1.0
   get_it: ^3.0.1
   json_serializable: ^3.0.0
   google_sign_in: ^4.0.7
   image_picker: ^0.6.1+4
-  dio: ^2.2.2
+  dio: ">=2.2.2 <6.0.0"
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -40,8 +40,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner:
-  mobx_codegen:
+  build_runner: any
+  mobx_codegen: any
   json_annotation: ^3.0.0
 
 # For information on the generic Dart part of this file, see the
